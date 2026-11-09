@@ -1,25 +1,52 @@
 <div align="center">
   <h1>SideQuest</h1>
   <p><strong>把主线、支线与下一步行动，留在桌面上。</strong></p>
-  <p><img alt="Windows" src="https://img.shields.io/badge/platform-Windows-0078D6"> <img alt="源码 V11.2" src="https://img.shields.io/badge/source-V11.2-B56C43"> <a href="https://github.com/hcycyxx/sidequest/stargazers"><img alt="GitHub Stars" src="https://img.shields.io/github/stars/hcycyxx/sidequest?color=3B77A1"></a></p>
+  <p><img alt="Windows" src="https://img.shields.io/badge/platform-Windows-0078D6"> <img alt="源码 V11.3" src="https://img.shields.io/badge/source-V11.3-B56C43"> <a href="https://github.com/hcycyxx/sidequest/stargazers"><img alt="GitHub Stars" src="https://img.shields.io/github/stars/hcycyxx/sidequest?color=3B77A1"></a></p>
 </div>
 
 Windows 桌面任务面板：结合窗口轨迹与可配置的模型接口辅助整理任务。支持完成确认、任务步骤、时间轴、模型设置和每日总结。
+
+## 效果预览
+
+以下是用户提供的实际界面截图。拍摄时处于暂停状态；主面板暂无任务，不代表任务识别或模型连接已验收。
+
+### 主面板与时间轴
+
+<p>
+  <a href="docs/images/main-panel-20261109.png"><img src="docs/images/main-panel-20261109.png" alt="SideQuest 主面板：暂停状态，暂无主线任务" width="280"></a>
+  <a href="docs/images/timeline-20261109.png"><img src="docs/images/timeline-20261109.png" alt="SideQuest 时间轴：窗口停留记录" width="280"></a>
+</p>
+
+### 主题与外观设置
+
+从左到右：轻透悬浮、杂志手账、夜航 HUD；另支持深蓝玻璃主题。
+
+<p>
+  <a href="docs/images/theme-transparent-20261109.png"><img src="docs/images/theme-transparent-20261109.png" alt="轻透悬浮主题的外观设置" width="200"></a>
+  <a href="docs/images/theme-journal-20261109.png"><img src="docs/images/theme-journal-20261109.png" alt="杂志手账主题的外观设置" width="200"></a>
+  <a href="docs/images/theme-night-20261109.png"><img src="docs/images/theme-night-20261109.png" alt="夜航 HUD 主题的外观设置" width="200"></a>
+</p>
+
+截图为此次详细设置页改版前采集的主面板与外观页，并非 V11.3 模型设置页的新截图。
 
 ## 版本与下载
 
 | 内容 | 当前状态 |
 | --- | --- |
-| 当前源码 | **V11.2**，由 `ui/current_release.json` 指定 |
+| 当前源码 | **V11.3**，由 `ui/current_release.json` 指定 |
 | 当前安装包 | **V11.2 / v11.2.0**，使用与构建记录一致的完整安装器 |
 | 历史安装包 | **V1.1.0** 保留供回退，不代表当前源码 |
-| 最新版界面截图 | 待补，不以旧界面或静态示意冒充运行截图 |
+| 实际界面截图 | 已补充上方五张用户截图；V11.3 详细设置页为新设计 |
 
 **[下载 V11.2 完整安装器](https://github.com/hcycyxx/sidequest/releases/download/v11.2.0/SideQuest_V11_2_FullSetup_20261107.exe)** · **[下载源码与中文文档](https://github.com/hcycyxx/sidequest/releases/download/v11.2.0/sidequest-v11.2-source-docs-20261109_v2.zip)** · [版本下载页](https://github.com/hcycyxx/sidequest/releases/tag/v11.2.0)
 
 [历史 V1.1.0 安装包](https://github.com/hcycyxx/sidequest/releases/download/v1.1.0/SideQuest-Setup-1.1.0.exe) · [版本说明](RELEASE_Installer_V11_2_20261107.md) · [更新日志](CHANGELOG.md)
 
 旧 README 提到的 `SideQuest-portable-1.1.0.zip` 目前未见于本仓库已发布附件，不作为可下载文件推荐。V11.1 便携版与 V11.2 安装版的构建说明保留，但不表示它们已发布。
+
+## V11.3 设置页改进
+
+详细设置页与主面板使用同一主题，移除割裂的系统白色标题栏；重新整理标签页、输入框、按钮和滚动条。设置存储、配置导入、模型检测与校验逻辑复用 V11.2。V11.3 安装包目前仅本地交付，GitHub Release 仍为 V11.2。
 
 ## 功能
 
