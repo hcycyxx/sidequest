@@ -11,9 +11,11 @@ Windows 桌面任务面板：结合窗口轨迹与可配置的模型接口辅助
 | 内容 | 当前状态 |
 | --- | --- |
 | 当前源码 | **V11.2**，由 `ui/current_release.json` 指定 |
-| 本仓库已发布安装包 | **V1.1.0 历史版**，不能代表最新源码 |
-| V11.2 完整安装包 | 仓库含构建记录；尚未发布到本仓库 Release |
+| 当前安装包 | **V11.2 / v11.2.0**，使用与构建记录一致的完整安装器 |
+| 历史安装包 | **V1.1.0** 保留供回退，不代表当前源码 |
 | 最新版界面截图 | 待补，不以旧界面或静态示意冒充运行截图 |
+
+**[下载 V11.2 完整安装器](https://github.com/hcycyxx/sidequest/releases/download/v11.2.0/SideQuest_V11_2_FullSetup_20261107.exe)** · **[下载源码与中文文档](https://github.com/hcycyxx/sidequest/releases/download/v11.2.0/sidequest-v11.2-source-docs-20261109_v2.zip)** · [版本下载页](https://github.com/hcycyxx/sidequest/releases/tag/v11.2.0)
 
 [历史 V1.1.0 安装包](https://github.com/hcycyxx/sidequest/releases/download/v1.1.0/SideQuest-Setup-1.1.0.exe) · [版本说明](RELEASE_Installer_V11_2_20261107.md) · [更新日志](CHANGELOG.md)
 
@@ -49,7 +51,7 @@ python -m venv .venv
 
 ### V11.2 完整安装版
 
-待本仓库发布后再按 Release 下载；当前安装路径及数据策略见 [V11.2 说明](RELEASE_Installer_V11_2_20261107.md)。安装前关闭旧版，避免两份并行。
+从 [v11.2.0 Release](https://github.com/hcycyxx/sidequest/releases/tag/v11.2.0) 下载完整安装器；当前安装路径及数据策略见 [V11.2 说明](RELEASE_Installer_V11_2_20261107.md)。安装前关闭旧版，避免两份并行。
 
 ## 使用与设置
 
@@ -81,7 +83,7 @@ V11.2 安装脚本为 `installer_v11_2/SideQuestSetup.iss`，PyInstaller 描述�
 
 ## 常见问题
 
-- **下载到旧版**：本仓库当前 Release 仍是 V1.1.0；先核对标签，不能把它当 V11.2。
+- **下载到旧版**：先核对 Release 标签；当前安装版为 v11.2.0，V1.1.0 是保留的历史版本。
 - **后台活着但没有任务更新**：查看最近识别时间、模型错误与本地日志；进程存活不等于推理成功。
 - **源码界面无法打开**：检查依赖、WebView2、.NET 和当前入口，不要重复运行多个版本。
 
