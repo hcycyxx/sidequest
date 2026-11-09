@@ -87,6 +87,17 @@ V11.2 安装脚本为 `installer_v11_2/SideQuestSetup.iss`，PyInstaller 描述�
 - **后台活着但没有任务更新**：查看最近识别时间、模型错误与本地日志；进程存活不等于推理成功。
 - **源码界面无法打开**：检查依赖、WebView2、.NET 和当前入口，不要重复运行多个版本。
 
+<!-- jack-white-rice-support:start -->
+## 请大肥鱼吃大白饭 🍚
+
+如果这个项目帮到了你，欢迎请大肥鱼吃一碗大白饭。自愿投喂，量力而行，感谢支持！
+
+<p>
+  <a href="assets/support/alipay-jack-v1.jpg"><img src="assets/support/alipay-jack-v1.jpg" alt="Jack 的支付宝收款码：请大肥鱼吃大白饭" height="320"></a>
+  <a href="assets/support/rice-meme-v1.png"><img src="assets/support/rice-meme-v1.png" alt="大肥鱼端碗表情包：饭呢？" height="320"></a>
+</p>
+<!-- jack-white-rice-support:end -->
+
 ## 文档与许可
 
 [V11.2 安装说明](RELEASE_Installer_V11_2_20261107.md) · [V11.1 设置改进](RELEASE_Settings_V11_1_20261107.md) · [历史 README 原文](docs/README_legacy_before_20261109.md)
