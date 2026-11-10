@@ -33,7 +33,7 @@ Windows 桌面任务面板：结合窗口轨迹与可配置的模型接口辅助
 
 当前版本：**V11.4 / v11.4.0**，由 `ui/current_release.json` 指定。历史 V11.3、V11.2 和 V1.1.0 保留供回退。
 
-**[下载 V11.4 完整安装器](https://github.com/hcycyxx/sidequest/releases/download/v11.4.0/SideQuest_V11_4_FullSetup_20261110.exe)** · **[完整源码与中文文档](https://github.com/hcycyxx/sidequest/releases/download/v11.4.0/SideQuest_V11_4_Source_Docs_20261110.zip)** · [版本发布页](https://github.com/hcycyxx/sidequest/releases/tag/v11.4.0)
+**[下载 V11.4 完整安装器](https://github.com/hcycyxx/sidequest/releases/download/v11.4.0/SideQuest-v11.4.0-windows-x64-setup.exe)** · **[完整源码与中文文档](https://github.com/hcycyxx/sidequest/releases/download/v11.4.0/SideQuest-v11.4.0-source-docs.zip)** · [版本发布页](https://github.com/hcycyxx/sidequest/releases/tag/v11.4.0)
 
 ## V11.4 更新
 
