@@ -1,0 +1,257 @@
+<div id="sq-settings-preview" class="viz-dotted-background">
+  <style>
+    #sq-settings-preview{--sq-bg:#14171f;--sq-hi:#232a38;--sq-fg:#f1f5fc;--sq-muted:#a8b7cc;--sq-gold:#ffd166;--sq-green:#92cbb1;--sq-stroke:#38465c;--sq-quiet:#292f3b;color:var(--sq-fg);font:500 14px/1.6 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;padding:20px 8px;color-scheme:dark}
+    #sq-settings-preview *{box-sizing:border-box}
+    #sq-settings-preview [hidden]{display:none!important}
+    #sq-settings-preview button,#sq-settings-preview input,#sq-settings-preview select,#sq-settings-preview textarea{font:inherit}
+    #sq-settings-preview button{color:inherit}
+    #sq-settings-preview button:disabled{opacity:.5;cursor:default}
+    #sq-settings-preview button:focus-visible,#sq-settings-preview input:focus-visible,#sq-settings-preview select:focus-visible,#sq-settings-preview textarea:focus-visible{outline:2px solid var(--sq-gold);outline-offset:3px}
+    #sq-settings-preview ::selection{background:#3d4b64;color:var(--sq-fg)}
+    #sq-settings-preview .sq-dialog{width:100%;max-width:680px;margin:0 auto;background:var(--sq-bg);border:1px solid var(--sq-quiet);border-radius:16px;overflow:hidden}
+    #sq-settings-preview .sq-toolbar{display:flex;align-items:center;gap:10px;min-height:54px;padding:8px 12px 8px 20px;border-bottom:1px solid var(--sq-quiet)}
+    #sq-settings-preview .sq-brand{font-weight:750;font-size:14px;letter-spacing:.01em}
+    #sq-settings-preview .sq-dot{width:5px;height:5px;flex-shrink:0;border-radius:50%;background:var(--sq-gold)}
+    #sq-settings-preview .sq-window-title{color:var(--sq-muted);font-size:12px}
+    #sq-settings-preview .sq-window-tools{display:flex;align-items:center;gap:4px;margin-left:auto}
+    #sq-settings-preview .sq-icon{display:grid;place-items:center;width:32px;height:32px;padding:8px;border:0;border-radius:7px;background:transparent;color:var(--sq-muted);transition:background .18s ease,color .18s ease}
+    #sq-settings-preview .sq-icon svg,#sq-settings-preview .sq-icon i{width:16px;height:16px}
+    #sq-settings-preview .sq-icon:hover{background:var(--sq-hi);color:var(--sq-fg)}
+    #sq-settings-preview .sq-heading{padding:24px 28px 20px}
+    #sq-settings-preview h2{font-size:23px;font-weight:750;line-height:1.4;margin:0 0 7px;letter-spacing:-.02em;color:var(--sq-fg)}
+    #sq-settings-preview p{margin:0}
+    #sq-settings-preview .sq-caption{font-size:12px;color:var(--sq-muted)}
+    #sq-settings-preview .sq-nav{display:flex;gap:5px;margin:0 28px;padding:4px;background:#1b202b;border-radius:10px}
+    #sq-settings-preview .sq-tab{flex:1;min-width:0;display:flex;justify-content:center;align-items:center;gap:8px;padding:9px 7px;border:0;border-radius:7px;background:transparent;color:var(--sq-muted);font-size:13px;white-space:nowrap;font-weight:650;transition:background .2s ease,color .2s ease}
+    #sq-settings-preview .sq-tab svg,#sq-settings-preview .sq-tab i{width:15px;height:15px;flex-shrink:0}
+    #sq-settings-preview .sq-tab:hover{background:var(--sq-hi)}
+    #sq-settings-preview .sq-tab[aria-selected=true]{background:var(--sq-hi);color:var(--sq-gold)}
+    #sq-settings-preview .sq-panel{padding:25px 28px 28px}
+    #sq-settings-preview .sq-section-title{font-size:14px;font-weight:700;margin:0 0 17px;color:var(--sq-fg)}
+    #sq-settings-preview .sq-field{display:grid;gap:7px;margin-bottom:19px;min-width:0}
+    #sq-settings-preview .sq-label{font-size:13px;font-weight:650;color:var(--sq-fg)}
+    #sq-settings-preview .sq-input,#sq-settings-preview .sq-select{width:100%;min-width:0;height:42px;border:1px solid #313a4b;background:#1d2330;color:var(--sq-fg);border-radius:9px;padding:9px 12px;caret-color:var(--sq-gold);transition:border-color .18s ease,background .18s ease}
+    #sq-settings-preview .sq-input:hover,#sq-settings-preview .sq-select:hover{border-color:#516078}
+    #sq-settings-preview .sq-input::placeholder{color:var(--sq-muted);opacity:1}
+    #sq-settings-preview .sq-hint{font-size:12px;color:var(--sq-muted);overflow-wrap:anywhere;line-height:1.65}
+    #sq-settings-preview .sq-inline{display:flex;align-items:center;gap:9px;min-width:0}
+    #sq-settings-preview .sq-inline .sq-input{flex:1}
+    #sq-settings-preview .sq-key-wrap{position:relative}
+    #sq-settings-preview .sq-key-wrap input{padding-right:47px}
+    #sq-settings-preview .sq-key-wrap .sq-icon{position:absolute;right:5px;top:5px}
+    #sq-settings-preview .sq-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:4px}
+    #sq-settings-preview .sq-button{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid transparent;border-radius:8px;background:var(--sq-hi);color:var(--sq-fg);padding:8px 13px;font-size:13px;font-weight:650;min-height:38px;transition:background .18s ease,transform .18s ease}
+    #sq-settings-preview .sq-button svg,#sq-settings-preview .sq-button i{width:15px;height:15px}
+    #sq-settings-preview .sq-button:hover{background:#303a4b}
+    #sq-settings-preview .sq-button:active{transform:translateY(1px)}
+    #sq-settings-preview .sq-ghost{background:transparent;color:var(--sq-muted)}
+    #sq-settings-preview .sq-primary{background:var(--sq-gold);color:var(--sq-bg)}
+    #sq-settings-preview .sq-primary:hover{background:#ffdc86}
+    #sq-settings-preview .sq-connection{display:flex;gap:8px;align-items:flex-start;color:var(--sq-muted);font-size:12px;margin-top:13px;min-height:21px}
+    #sq-settings-preview .sq-connection svg,#sq-settings-preview .sq-connection i{width:14px;height:14px;flex-shrink:0;margin-top:3px}
+    #sq-settings-preview .sq-connection[data-state=success]{color:var(--sq-green)}
+    #sq-settings-preview .sq-divider{border:0;border-top:1px solid var(--sq-quiet);margin:22px 0}
+    #sq-settings-preview .sq-interval{display:flex;align-items:center;justify-content:space-between;gap:18px}
+    #sq-settings-preview .sq-number{display:flex;align-items:center;gap:10px;color:var(--sq-muted);flex-shrink:0}
+    #sq-settings-preview .sq-number input{width:84px;text-align:center;font-variant-numeric:tabular-nums}
+    #sq-settings-preview .sq-stack{display:grid;gap:3px}
+    #sq-settings-preview .sq-footer{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 22px;border-top:1px solid var(--sq-quiet)}
+    #sq-settings-preview .sq-footer-copy{font-size:12px;color:var(--sq-muted);overflow-wrap:anywhere}
+    #sq-settings-preview .sq-footer-actions{display:flex;gap:8px;flex-shrink:0}
+    #sq-settings-preview .sq-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px 0;border-bottom:1px solid var(--sq-quiet)}
+    #sq-settings-preview .sq-toggle-row:first-child{padding-top:0}
+    #sq-settings-preview .sq-toggle{appearance:none;width:36px;height:21px;min-width:36px;margin:0;border:1px solid #516078;border-radius:12px;background:var(--sq-hi);position:relative;transition:background .2s ease,border-color .2s ease}
+    #sq-settings-preview .sq-toggle:before{content:"";position:absolute;left:3px;top:3px;width:13px;height:13px;border-radius:50%;background:var(--sq-muted);transition:transform .3s cubic-bezier(.16,1,.3,1)}
+    #sq-settings-preview .sq-toggle:checked{background:var(--sq-gold);border-color:var(--sq-gold)}
+    #sq-settings-preview .sq-toggle:checked:before{background:var(--sq-bg);transform:translateX(15px)}
+    #sq-settings-preview .sq-content-options{padding:0;border:0;margin:23px 0}
+    #sq-settings-preview .sq-content-options legend{padding:0;margin-bottom:10px}
+    #sq-settings-preview .sq-radios{display:flex;flex-wrap:wrap;gap:12px 20px}
+    #sq-settings-preview .sq-radios label{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--sq-muted)}
+    #sq-settings-preview input[type=radio]{accent-color:var(--sq-gold);margin:0}
+    #sq-settings-preview .sq-range-header{display:flex;align-items:center;justify-content:space-between}
+    #sq-settings-preview .sq-range-header output{font-variant-numeric:tabular-nums;color:var(--sq-gold);font-weight:650}
+    #sq-settings-preview input[type=range]{width:100%;accent-color:var(--sq-gold);margin:12px 0}
+    #sq-settings-preview .sq-type-sample{font-weight:650;padding:13px 0;color:var(--sq-fg)}
+    #sq-settings-preview .sq-opacity-scene{position:relative;isolation:isolate;overflow:hidden;min-height:215px;border-radius:12px;background:#29394d;padding:18px;margin:7px 0 2px}
+    #sq-settings-preview .sq-scene-background{position:absolute;inset:0;z-index:-1;display:grid;grid-template-columns:1fr 1.5fr;gap:15px;padding:13px;color:#c3cedd;font-size:12px}
+    #sq-settings-preview .sq-scene-file{background:#465970;border-radius:8px;padding:14px;line-height:2.5}
+    #sq-settings-preview .sq-scene-file:last-child{background:#354960;padding-top:45px}
+    #sq-settings-preview .sq-mini{--sq-panel-opacity:.9;max-width:290px;margin:auto;color:var(--sq-fg);background:rgb(20 23 31 / var(--sq-panel-opacity));border-radius:12px;overflow:hidden;box-shadow:0 10px 24px #0b101940;font-size:12px}
+    #sq-settings-preview .sq-mini-toolbar{display:flex;align-items:center;gap:7px;padding:9px 12px;border-bottom:1px solid #38465c66;font-size:11px}
+    #sq-settings-preview .sq-mini-toolbar strong{font-weight:750;font-size:12px}
+    #sq-settings-preview .sq-mini-toolbar span:last-child{color:var(--sq-muted)}
+    #sq-settings-preview .sq-mini-body{padding:14px}
+    #sq-settings-preview .sq-mini-title{font-weight:750;font-size:14px}
+    #sq-settings-preview .sq-mini-note{color:var(--sq-muted);font-size:11px;margin-top:4px}
+    #sq-settings-preview .sq-mini-track{height:4px;background:#a8b7cc24;margin-top:13px;border-radius:3px;overflow:hidden}
+    #sq-settings-preview .sq-mini-track span{display:block;width:44%;height:100%;background:#9bbce8}
+    #sq-settings-preview .sq-mini-next{margin-top:13px;padding:9px 10px;border-radius:8px;background:rgb(35 42 56 / var(--sq-panel-opacity));font-size:11px;color:var(--sq-gold)}
+    #sq-settings-preview .sq-prompt-fold{border-top:1px solid var(--sq-quiet);margin-top:24px;padding-top:5px}
+    #sq-settings-preview .sq-prompt-toggle{display:flex;align-items:center;justify-content:space-between;width:100%;gap:16px;text-align:left;background:transparent;border:0;border-radius:8px;padding:13px 0}
+    #sq-settings-preview .sq-prompt-toggle:hover .sq-label{color:var(--sq-gold)}
+    #sq-settings-preview .sq-prompt-toggle svg{width:16px;height:16px;color:var(--sq-muted);flex-shrink:0;transition:transform .5s cubic-bezier(.16,1,.3,1)}
+    #sq-settings-preview .sq-prompt-fold[data-open=true] .sq-prompt-toggle svg{transform:rotate(180deg)}
+    #sq-settings-preview .sq-prompt-body{display:grid;grid-template-rows:0fr;visibility:hidden;transition:grid-template-rows .52s cubic-bezier(.16,1,.3,1),visibility 0s .52s}
+    #sq-settings-preview .sq-prompt-fold[data-open=true] .sq-prompt-body{grid-template-rows:1fr;visibility:visible;transition:grid-template-rows .52s cubic-bezier(.16,1,.3,1),visibility 0s}
+    #sq-settings-preview .sq-prompt-inner{overflow:hidden;min-height:0}
+    #sq-settings-preview .sq-prompt-edit{display:grid;gap:10px;padding:3px 0 7px}
+    #sq-settings-preview .sq-prompt-input{width:100%;min-width:0;min-height:290px;max-height:540px;resize:vertical;border:1px solid var(--sq-stroke);border-radius:10px;padding:13px;background:#1d2330;color:var(--sq-fg);line-height:1.85;font-size:12px;caret-color:var(--sq-gold);scrollbar-width:thin;scrollbar-color:#526078 #1d2330}
+    #sq-settings-preview .sq-prompt-input::-webkit-scrollbar{width:6px}
+    #sq-settings-preview .sq-prompt-input::-webkit-scrollbar-thumb{background:#526078;border-radius:5px}
+    #sq-settings-preview .sq-prompt-meta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:5px 16px;color:var(--sq-muted);font-size:11px;font-variant-numeric:tabular-nums}
+    #sq-settings-preview .sq-prompt-input[aria-invalid=true]{border-color:#e2a3a3}
+    #sq-settings-preview .sq-combo{position:relative}
+    #sq-settings-preview .sq-combo .sq-input{padding-right:42px}
+    #sq-settings-preview .sq-combo>.sq-icon{position:absolute;right:5px;top:5px}
+    #sq-settings-preview .sq-model-list{position:absolute;top:48px;left:0;right:0;background:var(--sq-hi);padding:6px;border:1px solid var(--sq-stroke);border-radius:10px;z-index:4;box-shadow:0 12px 24px #00000040}
+    #sq-settings-preview .sq-model-option{display:block;width:100%;text-align:left;border:0;background:transparent;color:var(--sq-fg);padding:9px 10px;border-radius:6px;overflow-wrap:anywhere}
+    #sq-settings-preview .sq-model-option:hover{background:#303a4b}
+    #sq-settings-preview .sq-reopen{max-width:680px;margin:0 auto;text-align:center;padding:30px}
+    #sq-settings-preview .sq-content.is-changing{animation:sq-settings-switch .28s cubic-bezier(.16,1,.3,1)}
+    @keyframes sq-settings-switch{from{opacity:.65;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+    @media(max-width:520px){#sq-settings-preview .sq-heading{padding:22px 18px 18px}#sq-settings-preview .sq-nav{margin:0 16px}#sq-settings-preview .sq-panel{padding:22px 18px}#sq-settings-preview .sq-tab{font-size:12px;gap:5px}#sq-settings-preview .sq-tab svg{display:none}#sq-settings-preview .sq-footer{padding:14px 16px;flex-wrap:wrap}#sq-settings-preview .sq-footer-copy{flex-basis:100%}#sq-settings-preview .sq-footer-actions{margin-left:auto}#sq-settings-preview .sq-interval{align-items:flex-start;flex-wrap:wrap}#sq-settings-preview .sq-toolbar{padding-left:16px}#sq-settings-preview .sq-button{padding-inline:11px}}
+    @media(pointer:coarse){#sq-settings-preview .sq-icon,#sq-settings-preview .sq-button,#sq-settings-preview .sq-tab{min-height:44px}#sq-settings-preview .sq-input,#sq-settings-preview .sq-select{height:46px;font-size:16px}#sq-settings-preview .sq-key-wrap .sq-icon,#sq-settings-preview .sq-combo>.sq-icon{top:1px}#sq-settings-preview .sq-toggle-row{min-height:64px}}
+    @media(prefers-reduced-motion:reduce){#sq-settings-preview *,#sq-settings-preview *:before{animation:none!important;transition:none!important}}
+  </style>
+  <section class="sq-dialog" aria-label="SideQuest 设置预览">
+    <header class="sq-toolbar">
+      <span class="sq-brand">SideQuest</span><span class="sq-dot" aria-hidden="true"></span><span class="sq-window-title">设置</span>
+      <div class="sq-window-tools">
+        <button class="sq-icon cursor-interaction" type="button" data-action="minimize" aria-label="收起设置预览" aria-expanded="true"><i data-lucide="minus" aria-hidden="true"></i></button>
+        <button class="sq-icon cursor-interaction" type="button" data-action="close" aria-label="关闭设置预览"><i data-lucide="x" aria-hidden="true"></i></button>
+      </div>
+    </header>
+    <div class="sq-content">
+      <div class="sq-heading"><h2>偏好设置</h2><p class="sq-caption">连接你的模型，调整 SideQuest 的工作方式。</p></div>
+      <nav class="sq-nav" role="tablist" aria-label="设置分类">
+        <button class="sq-tab cursor-interaction" id="sqp-tab-model" type="button" role="tab" aria-controls="sqp-model" aria-selected="true" data-tab="model"><i data-lucide="plug" aria-hidden="true"></i>模型连接</button>
+        <button class="sq-tab cursor-interaction" id="sqp-tab-monitor" type="button" role="tab" aria-controls="sqp-monitor" aria-selected="false" data-tab="monitor"><i data-lucide="scan-text" aria-hidden="true"></i>监测与内容</button>
+        <button class="sq-tab cursor-interaction" id="sqp-tab-display" type="button" role="tab" aria-controls="sqp-display" aria-selected="false" data-tab="display"><i data-lucide="sliders-horizontal" aria-hidden="true"></i>界面与日报</button>
+      </nav>
+      <form novalidate>
+        <section class="sq-panel" id="sqp-model" role="tabpanel" aria-labelledby="sqp-tab-model">
+          <div class="sq-field"><label class="sq-label" for="sqp-url">接口地址</label><input class="sq-input" id="sqp-url" type="url" value="http://127.0.0.1:8899/v1" spellcheck="false" aria-describedby="sqp-url-hint"><p class="sq-hint" id="sqp-url-hint">支持本地桥接或官方兼容接口。DeepSeek 官方地址：https://api.deepseek.com</p></div>
+          <div class="sq-field"><label class="sq-label" for="sqp-key">API Key</label><div class="sq-key-wrap"><input class="sq-input" id="sqp-key" type="password" autocomplete="off" placeholder="输入接口密钥" aria-describedby="sqp-key-hint"><button class="sq-icon cursor-interaction" type="button" data-action="key" aria-label="显示密钥" aria-pressed="false"><i data-lucide="eye" aria-hidden="true"></i></button></div><p class="sq-hint" id="sqp-key-hint">正式版仅保存在本地；本预览不会保存密钥。</p></div>
+          <div class="sq-field"><label class="sq-label" for="sqp-model-name">模型名称</label><div class="sq-combo"><input class="sq-input" id="sqp-model-name" value="deepseek-v4.1-flash" role="combobox" aria-autocomplete="none" aria-controls="sqp-model-options" aria-expanded="false" spellcheck="false"><button class="sq-icon cursor-interaction" type="button" data-action="models" aria-label="展开演示模型列表"><i data-lucide="chevron-down" aria-hidden="true"></i></button><div class="sq-model-list" id="sqp-model-options" role="listbox" aria-label="演示模型列表" hidden><button type="button" class="sq-model-option cursor-interaction" role="option" aria-selected="true">deepseek-v4.1-flash</button><button type="button" class="sq-model-option cursor-interaction" role="option" aria-selected="false">hy3</button></div></div><p class="sq-hint">可手动输入，或从获取的模型列表中选择。</p></div>
+          <div class="sq-actions"><button class="sq-button cursor-interaction" type="button" data-action="fetch"><i data-lucide="list-restart" aria-hidden="true"></i>获取模型</button><button class="sq-button cursor-interaction" type="button" data-action="check"><i data-lucide="activity" aria-hidden="true"></i>检测连通性</button><button class="sq-button sq-ghost cursor-interaction" type="button" data-action="import"><i data-lucide="folder-input" aria-hidden="true"></i>导入旧配置</button></div>
+          <div class="sq-connection" role="status" aria-live="polite"><i data-lucide="info" aria-hidden="true"></i><span data-connection>正式版仅检查 /models，不发起模型推理。</span></div>
+          <hr class="sq-divider">
+          <div class="sq-interval"><div class="sq-stack"><label class="sq-label" for="sqp-interval">分析间隔</label><span class="sq-hint">不影响窗口停留时长记录。</span></div><div class="sq-number"><input class="sq-input" id="sqp-interval" type="number" min="30" max="3600" step="1" value="60" aria-describedby="sqp-interval-hint"><span>秒</span></div></div><p class="sq-hint" id="sqp-interval-hint" style="margin-top:10px">范围 30–3600 秒，默认 60 秒。</p>
+        </section>
+        <section class="sq-panel" id="sqp-monitor" role="tabpanel" aria-labelledby="sqp-tab-monitor" hidden>
+          <label class="sq-toggle-row" for="sqp-capture"><span class="sq-stack"><span class="sq-label">读取窗口文字</span><span class="sq-hint">帮助模型理解当前正在做的事。</span></span><input class="sq-toggle cursor-interaction" id="sqp-capture" type="checkbox" checked></label>
+          <label class="sq-toggle-row" for="sqp-doc"><span class="sq-stack"><span class="sq-label">读取已保存的文档原文</span><span class="sq-hint">允许使用 Excel / Word 内容作为辅助依据。</span></span><input class="sq-toggle cursor-interaction" id="sqp-doc" type="checkbox" checked></label>
+          <fieldset class="sq-content-options"><legend class="sq-label">提供给模型的内容量</legend><div class="sq-radios"><label><input type="radio" name="sqp-level" value="off">仅窗口标题</label><label><input type="radio" name="sqp-level" value="light" checked>最近 2 段</label><label><input type="radio" name="sqp-level" value="full">最近 5 段</label></div></fieldset>
+          <div class="sq-field"><label class="sq-label" for="sqp-ocr">OCR 引擎</label><select class="sq-select cursor-interaction" id="sqp-ocr"><option value="auto">自动选择</option><option value="rapid">RapidOCR</option><option value="windows">Windows 系统 OCR</option><option value="off">关闭 OCR</option></select><p class="sq-hint">用于识别无法直接读取的窗口文字。</p></div>
+          <section class="sq-prompt-fold" data-open="false" aria-label="任务识别提示词设置">
+            <button class="sq-prompt-toggle cursor-interaction" type="button" data-action="prompt" aria-expanded="false" aria-controls="sqp-prompt-body"><span class="sq-stack"><span class="sq-label">任务识别提示词</span><span class="sq-hint">调整主线、支线和进度的判断规则</span></span><i data-lucide="chevron-down" aria-hidden="true"></i></button>
+            <div class="sq-prompt-body" id="sqp-prompt-body" inert><div class="sq-prompt-inner"><div class="sq-prompt-edit"><label class="sq-label" for="sqp-prompt">发送给大模型的系统提示词</label><textarea class="sq-prompt-input" id="sqp-prompt" spellcheck="false" aria-describedby="sqp-prompt-hint">你是任务面板分析引擎。用户在你不知道的时候用电脑工作，你每分钟收到一次他最近的窗口活动轨迹，任务是更新他的游戏风格任务面板状态。
+
+轨迹有三种行：
+- `20:42:38 [wps.exe] 报价表.xlsx - WPS 表格 · 5分12秒` 表示他在这个窗口待了这么久。
+- 紧跟其后的 `    文档: ...` 是**直接读取该文件**得到的原文（xlsx/docx 内部就是文本），它是磁盘候选版本，不一定是正在看的文件、工作表或未保存内容；客户、型号、金额必须与屏幕证据交叉核对。
+- 紧跟其后的 `    看到: ...` 是从窗口截图里认出来的字（聊天记录、网页、PDF、WPS 私有格式）。它比标题精确，但**认字会出错**：`缋效` 其实是 `绩效`、`报佾` 是 `报价`。别把看起来不像词的片段当成客户名或文件名；能从上下文推断出正确写法的，用正确写法。
+
+规则：
+1. main_quests 主线：今天的主要工作目标。side_quests 支线：中途插入的短任务（如临时搜文件、回消息、整理包材）。
+2. status 取值 active/pending/done/waiting。steps 是可勾选步骤。progress 简短如"2/3"或"草拟中"。note 记录判断依据（窗口标题+时间，或看到了什么）。
+3. priority 取值 high/mid/low：你自己判断这项任务有多重要。客户下单、发货、交期、金额大、有人在等回复的，给 high；日常整理、查资料给 low。同一天里 high 的任务永远排在前面。
+4. current_activity：一句话描述他现在在干嘛。要具体到内容，不要只说应用名：写"在改 KYNKO 报价表的单价栏"，不要写"在用 WPS"。这句话会显示在面板顶部，超过两行会被折叠，所以不要写成一段话，控制在 40 字以内。这一项不要留空——真的看不出在干什么，就重复上一轮的说法。
+5. suggestion：一句话建议（下一步做什么、是否跑偏、支线该收尾回主线了）。这一项也不要留空，没有更好的建议就沿用上一轮。
+6. 幂等节俭：与上次状态相比无实质变化时，输出 {"changed": false} 即可，不要重新生成全部内容。
+7. 从轨迹推断任务时要具体（文件名、客户名、单据号都保留）。看到新文档/新客户名可自动建支线或更新主线。
+8. 看到的内容里如果有明确的业务动作（收到订单、客户问价、要发货），那是新支线的信号，别当成噪声。
+
+自主判断（重要）：
+9. 完成必须由用户确认。看到明确发出、交付等信号时，用 pending 和 completion_candidate:true，并写 completion_evidence，等待用户勾选；不要自行标 done。文件名带 Final、保存关闭、切走窗口均不足以证明业务完成。
+10. 之前自动误判的任务可用 active 和 reopen:true 重开；用户手动状态不能覆盖。
+11. 两小时未碰的支线只能 pending 或 waiting，绝不能因时间过去而标 done。
+12. 每项给 live_progress：22字以内的实时进展，描述观察到的成果和正在做的步骤，不重复标题。只有有工作量依据时给 progress_range:[下限,上限]（0~95，按10个百分点分档）和 progress_basis；无法判断写 null，不按耗时增长。等待状态不得增长进度。区间是工作量估算，不是步骤勾选比例。
+13. 在 note 写清依据来源、原始观察时间；磁盘候选须注明非当前视图，OCR 须注明可能错字。不要编造路径、时间或证据。
+14. 只输出 JSON，不要 markdown 代码块，不要解释。
+
+输出格式：
+{"changed": true/false, "state": {"main_quests":[{"id":"M1","title":"...","status":"active","priority":"high","progress":"...","live_progress":"...","progress_range":null,"progress_basis":"","note":"...","steps":[{"text":"...","done":false}]}], "side_quests":[同结构], "current_activity":"...", "suggestion":"...", "updated_at":"ISO时间"}}
+只输出 JSON。</textarea><div class="sq-prompt-meta"><span>当前版本内置提示词 · 可直接编辑</span><output for="sqp-prompt" data-prompt-count></output></div><p class="sq-hint" id="sqp-prompt-hint">请保留 JSON 输出格式与字段，保证任务面板能读取结果。本预览仅演示编辑，不影响正在运行的模型。</p></div></div></div>
+          </section>
+          <p class="sq-hint" style="margin-top:18px">正式版修改监测方式后，在主面板暂停再继续，即可重新加载配置。</p>
+        </section>
+        <section class="sq-panel" id="sqp-display" role="tabpanel" aria-labelledby="sqp-tab-display" hidden>
+          <div class="sq-field"><div class="sq-range-header"><label class="sq-label" for="sqp-opacity">面板背景不透明度</label><output for="sqp-opacity" id="sqp-opacity-value">90%</output></div><input id="sqp-opacity" type="range" min="20" max="100" step="1" value="90"><p class="sq-hint">向左更透明，向右更实。文字、图标与进度条始终清晰。</p>
+            <div class="sq-opacity-scene" aria-label="主面板透明度实时示意"><div class="sq-scene-background" aria-hidden="true"><div class="sq-scene-file">客户资料<br>报价记录<br>产品清单</div><div class="sq-scene-file">工作文档<br>待办记录</div></div><div class="sq-mini"><div class="sq-mini-toolbar"><strong>SideQuest</strong><span class="sq-dot" aria-hidden="true"></span><span>观察中</span></div><div class="sq-mini-body"><p class="sq-mini-title">核对客户报价</p><p class="sq-mini-note">查看单价与交期 · 示例任务</p><div class="sq-mini-track" aria-hidden="true"><span></span></div><p class="sq-mini-next">下一步建议 · 确认报价明细</p></div></div></div>
+          </div><hr class="sq-divider">
+          <div class="sq-field"><div class="sq-range-header"><label class="sq-label" for="sqp-font">面板字号</label><output for="sqp-font" id="sqp-font-value">10</output></div><input id="sqp-font" type="range" min="8" max="16" step="1" value="10"><p class="sq-hint">沿用现有字号范围，支持 8–16。</p><p class="sq-type-sample" data-type-sample>把注意力，留给正在推进的任务。</p></div><hr class="sq-divider"><div class="sq-interval"><div class="sq-stack"><label class="sq-label" for="sqp-hour">日报生成时间</label><span class="sq-hint">每天在指定整点生成日报。</span></div><div class="sq-number"><input class="sq-input" id="sqp-hour" type="number" min="0" max="23" step="1" value="18"><span>点</span></div></div><p class="sq-hint" style="margin-top:12px">范围 0–23 点。保存设置不会立即生成日报。</p>
+        </section>
+        <footer class="sq-footer"><p class="sq-footer-copy" role="status" aria-live="polite" data-feedback>界面预览 · 未连接真实配置</p><div class="sq-footer-actions"><button class="sq-button sq-ghost cursor-interaction" type="button" data-action="close">取消</button><button class="sq-button sq-primary cursor-interaction" type="submit">保存设置</button></div></footer>
+      </form>
+    </div>
+  </section>
+  <div class="sq-reopen" hidden><button class="sq-button sq-primary cursor-interaction" type="button" data-action="reopen">重新打开设置</button></div>
+  <script>
+    (()=>{
+      const root=document.getElementById('sq-settings-preview');
+      const q=s=>root.querySelector(s),qa=s=>[...root.querySelectorAll(s)];
+      const dialog=q('.sq-dialog'),content=q('.sq-content'),feedback=q('[data-feedback]'),modelInput=q('#sqp-model-name'),list=q('#sqp-model-options');
+      const state={tab:'display',panelOpacity:90,promptOpen:false},validTabs=['model','monitor','display'];let busy=false,timer=null;
+      const promptInput=q('#sqp-prompt');
+      function applyOpacity(value){const amount=Number(value);if(!Number.isFinite(amount)||amount<20||amount>100)return;state.panelOpacity=amount;q('#sqp-opacity').value=amount;q('#sqp-opacity-value').value=amount+'%';q('.sq-mini').style.setProperty('--sq-panel-opacity',String(amount/100));}
+      function showPrompt(open){state.promptOpen=Boolean(open);q('.sq-prompt-fold').dataset.open=String(state.promptOpen);q('[data-action=prompt]').setAttribute('aria-expanded',String(state.promptOpen));q('#sqp-prompt-body').inert=!state.promptOpen;}
+      function promptCount(){q('[data-prompt-count]').value=Array.from(promptInput.value).length+' 字';}
+      function icons(){if(globalThis.lucide)globalThis.lucide.createIcons({attrs:{width:16,height:16,'stroke-width':1.7}});}
+      function showModels(open){list.hidden=!open;modelInput.setAttribute('aria-expanded',String(open));}
+      function setTab(tab,animate=true){
+        if(!validTabs.includes(tab))return;state.tab=tab;showModels(false);
+        qa('[data-tab]').forEach(button=>button.setAttribute('aria-selected',String(button.dataset.tab===tab)));
+        qa('[role=tabpanel]').forEach(panel=>panel.hidden=panel.id!=='sqp-'+tab);
+        if(animate){content.classList.remove('is-changing');requestAnimationFrame(()=>content.classList.add('is-changing'));}
+      }
+      function persist(){if(window.openai?.setWidgetState)window.openai.setWidgetState({modelContent:{preview:'SideQuest 设置预览 V2',tab:state.tab,panelOpacity:state.panelOpacity,promptOpen:state.promptOpen},privateContent:null}).catch(()=>{});}
+      function restore(saved){if(!saved)return;if(validTabs.includes(saved.tab))setTab(saved.tab,false);if(typeof saved.panelOpacity==='number')applyOpacity(saved.panelOpacity);if(typeof saved.promptOpen==='boolean')showPrompt(saved.promptOpen);}
+      setTab(state.tab,false);applyOpacity(state.panelOpacity);showPrompt(false);promptCount();
+      restore(window.openai?.widgetState?.modelContent||window.openai?.widgetState);
+      window.addEventListener('openai:set_globals',event=>{const saved=event.detail?.globals?.widgetState;restore(saved?.modelContent||saved);});
+      root.addEventListener('click',event=>{
+        const tab=event.target.closest('[data-tab]');if(tab){setTab(tab.dataset.tab);persist();return;}
+        const option=event.target.closest('.sq-model-option');if(option){modelInput.value=option.textContent.trim();qa('.sq-model-option').forEach(item=>item.setAttribute('aria-selected',String(item===option)));showModels(false);modelInput.focus();return;}
+        const button=event.target.closest('[data-action]');if(!button){if(!event.target.closest('.sq-combo'))showModels(false);return;}
+        const action=button.dataset.action;
+        if(action==='prompt'){showPrompt(!state.promptOpen);persist();return;}
+        if(action==='models'){showModels(list.hidden);return;}
+        if(action==='key'){const input=q('#sqp-key'),shown=input.type==='password';input.type=shown?'text':'password';button.setAttribute('aria-pressed',String(shown));button.setAttribute('aria-label',shown?'隐藏密钥':'显示密钥');button.innerHTML='<i data-lucide="'+(shown?'eye-off':'eye')+'" aria-hidden="true"></i>';icons();return;}
+        if(action==='close'){dialog.hidden=true;q('.sq-reopen').hidden=false;showModels(false);q('[data-action=reopen]').focus();return;}
+        if(action==='reopen'){dialog.hidden=false;q('.sq-reopen').hidden=true;content.hidden=false;q('[data-action=minimize]').setAttribute('aria-expanded','true');q('[data-action=minimize]').setAttribute('aria-label','收起设置预览');q('[data-tab="'+state.tab+'"]').focus();return;}
+        if(action==='minimize'){content.hidden=!content.hidden;button.setAttribute('aria-expanded',String(!content.hidden));button.setAttribute('aria-label',content.hidden?'展开设置预览':'收起设置预览');return;}
+        if(action==='import'){feedback.textContent='预览不读取文件；正式版可导入旧版接口配置。';return;}
+        if((action==='fetch'||action==='check')&&!busy){
+          busy=true;qa('[data-action=fetch],[data-action=check]').forEach(item=>item.disabled=true);
+          q('.sq-connection').dataset.state='loading';q('[data-connection]').textContent=action==='fetch'?'演示：正在获取模型…':'演示：正在检测连通性…';
+          timer=setTimeout(()=>{busy=false;qa('[data-action=fetch],[data-action=check]').forEach(item=>item.disabled=false);q('.sq-connection').dataset.state='success';q('[data-connection]').textContent=action==='fetch'?'演示：列表已展开，包含 2 个示例模型。未发送请求。':'演示：连接成功的提示样式。未发送真实请求。';if(action==='fetch'&&!dialog.hidden&&!content.hidden&&state.tab==='model')showModels(true);},650);
+        }
+      });
+      q('.sq-nav').addEventListener('keydown',event=>{
+        if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+        const buttons=qa('[data-tab]'),index=buttons.indexOf(event.target);if(index<0)return;event.preventDefault();
+        const next=event.key==='Home'?0:event.key==='End'?2:(index+(event.key==='ArrowRight'?1:2))%3;
+        setTab(buttons[next].dataset.tab);buttons[next].focus();persist();
+      });
+      modelInput.addEventListener('keydown',event=>{if(event.key==='ArrowDown'){event.preventDefault();showModels(true);q('.sq-model-option').focus();}if(event.key==='Escape')showModels(false);});
+      list.addEventListener('keydown',event=>{const options=qa('.sq-model-option'),index=options.indexOf(event.target);if(event.key==='Escape'){showModels(false);modelInput.focus();}if(['ArrowDown','ArrowUp'].includes(event.key)){event.preventDefault();options[(index+(event.key==='ArrowDown'?1:options.length-1))%options.length].focus();}});
+      q('#sqp-font').addEventListener('input',event=>{q('#sqp-font-value').value=event.target.value;q('[data-type-sample]').style.fontSize=(Number(event.target.value)+4)+'px';});
+      q('#sqp-opacity').addEventListener('input',event=>applyOpacity(event.target.value));
+      q('#sqp-opacity').addEventListener('change',persist);
+      promptInput.addEventListener('input',()=>{promptInput.removeAttribute('aria-invalid');promptCount();});
+      q('form').addEventListener('submit',event=>{
+        event.preventDefault();let problem=null,field=null,tab='model';
+        try{const url=new URL(q('#sqp-url').value);if(!['http:','https:'].includes(url.protocol)||url.username||url.password||url.search||url.hash)throw Error();}catch{problem='请填写完整的 http / https 接口地址。';field=q('#sqp-url');}
+        if(!problem&&!modelInput.value.trim()){problem='请填写模型名称。';field=modelInput;}
+        if(!problem&&!promptInput.value.trim()){problem='提示词不能为空，请填写任务识别规则。';field=promptInput;tab='monitor';showPrompt(true);promptInput.setAttribute('aria-invalid','true');}
+        for(const [selector,low,high,label,target] of [['#sqp-interval',30,3600,'分析间隔','model'],['#sqp-hour',0,23,'日报时间','display']]){const input=q(selector),value=Number(input.value);if(!problem&&(!input.value.trim()||!Number.isInteger(value)||value<low||value>high)){problem=label+'应为 '+low+'–'+high+' 的整数。';field=input;tab=target;}}
+        if(problem){setTab(tab);feedback.textContent=problem;feedback.setAttribute('role','alert');if(field===promptInput){showPrompt(true);setTimeout(()=>field.focus(),550);}else field.focus();return;}
+        feedback.setAttribute('role','status');feedback.textContent='预览设置已确认，未写入真实配置。';
+      });
+      root.addEventListener('keydown',event=>{if(event.key==='Escape')showModels(false);});
+      window.addEventListener('pagehide',()=>clearTimeout(timer),{once:true});
+    })();
+  </script>
+</div>
