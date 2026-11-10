@@ -129,9 +129,10 @@
     heading.append(complete,title,el('span',task.status==='waiting'?'sq-waiting':'sq-priority',label));
     const note=[task.note,task.progress_basis?'估算依据：'+task.progress_basis:''].filter(Boolean).join('\n');
     if(note)details.append(el('p','sq-note',note));
-    (task.steps||[]).forEach((step,index)=>details.append(checkbox(task,step,index)));
+    const subTasks=el('div','sq-task-step-list');
+    (task.steps||[]).forEach((step,index)=>subTasks.append(checkbox(task,step,index)));
     if(!note&&!task.steps?.length)details.append(el('p','','暂无补充说明'));
-    article.append(heading,el('p','',task.live),progressNode(task.progress,task.status==='waiting'),details);attachCardGrip(article,task);attachTextPress(article);return article;
+    article.append(heading,el('p','',task.live),progressNode(task.progress,task.status==='waiting'),subTasks,details);attachCardGrip(article,task);attachTextPress(article);return article;
   }
   function renderOthers(){
     const signature=JSON.stringify([state.others,state.more,state.prefs.cardOrder]);if(signature===othersSignature)return;
@@ -143,16 +144,22 @@
     text('.sq-count',state.others.length);icons();
   }
   function renderHistory(){
-    const signature=JSON.stringify(state.historyRows);if(signature===historySignature)return;historySignature=signature;
+    const source=state.records.length?state.records:[...(state.current?[state.current]:[]),...state.others,...state.historyRows];
+    const records=source.filter(task=>state.historyFilter==='all'||(task.status==='done')===(state.historyFilter==='done'));
+    const signature=JSON.stringify([records,state.historyFilter,state.historyLimit]);if(signature===historySignature)return;historySignature=signature;
     const listing=q('[data-history-list]');listing.replaceChildren();
-    state.historyRows.forEach(task=>{const row=el('div','sq-history-row'),content=el('div','',task.title);
-      const time=task.completed_at?new Date(task.completed_at).toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'完成时间未记录';
-      content.append(el('span','sq-history-time',time));const restore=el('button','sq-text-button','恢复');restore.dataset.saveControl='true';restore.addEventListener('click',()=>changeTask(task,{kind:'task',done:false}));row.append(content,restore);listing.append(row);});
-    if(!state.historyRows.length)listing.append(el('p','','暂无完成记录'));
+    const filters=el('div','sq-record-filters');[['all','全部'],['active','未完成'],['done','已完成']].forEach(([key,label])=>{const button=el('button','sq-text-button',label);button.setAttribute('aria-pressed',String(key===state.historyFilter));button.addEventListener('click',()=>{state.historyFilter=key;state.historyLimit=40;renderHistory();requestFit(true);});filters.append(button);});listing.append(filters);
+    records.slice(0,state.historyLimit).forEach(task=>{const row=el('div','sq-history-row'),content=el('div','',task.title);
+      const date=task.completed_at?new Date(task.completed_at):null;
+      const time=task.status==='done'?(date&&!Number.isNaN(date.valueOf())?'完成于 '+date.toLocaleString('zh-CN'):'已完成 · 完成时间未记录'):({active:'进行中',pending:'待处理',waiting:'等待中'}[task.status]||'未完成');
+      content.append(el('span','sq-history-time',time));row.append(content);
+      if(task.status==='done'){const restore=el('button','sq-text-button','恢复');restore.dataset.saveControl='true';restore.addEventListener('click',()=>changeTask(task,{kind:'task',done:false}));row.append(restore);}listing.append(row);});
+    if(!records.length)listing.append(el('p','','暂无对应任务记录'));
+    if(records.length>state.historyLimit){const more=el('button','sq-text-button','再显示 40 项');more.addEventListener('click',()=>{state.historyLimit+=40;renderHistory();requestFit(true);});listing.append(more);}
   }
   function applySnapshot(snapshot){
     if(!snapshot)return;
-    state.health=snapshot.health||{};state.serviceBusy=!!state.health.busy;state.paused=!!snapshot.paused;state.resting=!!snapshot.resting;state.others=snapshot.others;state.historyRows=snapshot.history;
+    state.health=snapshot.health||{};state.serviceBusy=!!state.health.busy;state.paused=!!snapshot.paused;state.resting=!!snapshot.resting;state.others=snapshot.others;state.historyRows=snapshot.history;state.records=snapshot.records||[];
     if(!prefsPending)applyPrefs(snapshot.prefs,!initialized);initialized=true;applyDesktop(snapshot.desktop);
     renderMain(snapshot.current);renderOthers();renderHistory();
     text('[data-next]',snapshot.suggestion);text('.sq-observation p',snapshot.activity);
@@ -174,7 +181,7 @@
     const min=q('.sq-tools [data-action=minimize]');buttonIcon(min,state.desktop.minimized?'maximize-2':'minus');min.dataset.tooltip=state.desktop.minimized?'还原任务面板':'最小化为窄条';min.setAttribute('aria-label',min.dataset.tooltip);
     q('.sq-resize-handle').hidden=!!state.desktop.minimized;q('.sq-history').hidden=!state.history;icons();
   }
-  function applyDesktop(value){if(!value||!Object.keys(value).length)return;state.desktop=value;root.dataset.edge=value.edgeSide||'';root.dataset.hidden=String(!!value.edgeHidden);q('.sq-edge-tab').hidden=!value.edgeHidden;renderChrome();requestFit();}
+  function applyDesktop(value){if(!value||!Object.keys(value).length||(value.viewRevision||0)<(state.desktop.viewRevision||0))return;state.desktop=value;root.dataset.edge=value.edgeSide||'';root.dataset.hidden=String(!!value.edgeHidden);q('.sq-edge-tab').hidden=!value.edgeHidden;renderChrome();requestFit();}
   window.sidequestDesktop=applyDesktop;
   function menu(open){q('#sq-menu').hidden=!open;q('#sq-menu').style.top=(toolbar.offsetHeight+4)+'px';q('[data-action=menu]').setAttribute('aria-expanded',String(open));setHold('menu',open);requestFit();}
   const healthView=el('details','sq-health'),healthHeading=el('summary','','后台状态'),healthText=el('p','');healthView.append(healthHeading,healthText);q('.sq-settings').insertBefore(healthView,q('.sq-settings .sq-return'));

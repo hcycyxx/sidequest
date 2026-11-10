@@ -122,11 +122,14 @@ class Bridge:
         font=number(old.get('font_size'),10,8,16)
         self._prefs={'skin':old.get('skin','glass'),'font':round(font*4/3),
                      'pinned':old.get('topmost',True),'autoHide':True,'width':336,'height':620,
-                     'expanded':True,'stepsOpen':False,'edgeSide':None}
+                     'expanded':True,'stepsOpen':True,'edgeSide':None,
+                     'panelOpacity':number(old.get('panel_opacity'),100,20,100),'subtasksV11_3':False}
         saved=read_json(self._prefs_path,{})
         self._prefs.update({key:value for key,value in saved.items() if key in self._prefs or key in ('x','y')})
+        if self._prefs.get('subtasksV11_3') is not True:
+            self._prefs.update(stepsOpen=True,subtasksV11_3=True)
         if self._prefs.get('skin') not in ('glass','transparent','journal','night'):self._prefs['skin']='glass'
-        for key,default,low,high in [('font',14,13,21),('width',336,300,1600),('height',620,240,1800)]:
+        for key,default,low,high in [('font',14,13,21),('width',336,300,1600),('height',620,240,1800),('panelOpacity',100,20,100)]:
             self._prefs[key]=number(self._prefs.get(key),default,low,high)
         for key in ('pinned','autoHide','expanded','stepsOpen'):
             if type(self._prefs.get(key)) is not bool:self._prefs[key]=key!='stepsOpen'
@@ -138,6 +141,7 @@ class Bridge:
                 else:self._prefs[key]=number(value,0,-100000,100000)
         self._old_ui_stamp=self._file_stamp(self._data/'ui.json')
         self._old_ui_font=read_json(self._data/'ui.json',{}).get('font_size')
+        self._old_ui_opacity=read_json(self._data/'ui.json',{}).get('panel_opacity')
         self._base_python = str(Path(sys.base_prefix) / "python.exe")
         self._lifecycle=Lifecycle()
         if self._controller:self._controller._lifecycle=self._lifecycle
@@ -167,6 +171,10 @@ class Bridge:
             if value!=self._old_ui_font:
                 self._old_ui_font=value
                 if type(value) is int:self.preferences({"font": round(value * 4 / 3)})
+            opacity=read_json(path,{}).get('panel_opacity')
+            if opacity!=self._old_ui_opacity:
+                self._old_ui_opacity=opacity
+                if type(opacity) is int:self.preferences({'panelOpacity':opacity})
 
     def _save_preferences(self, patch):
         with self._lock:
@@ -179,7 +187,7 @@ class Bridge:
                         approved[key] = patch[key]
                 if patch.get("skin") in ("glass", "transparent", "journal", "night"):
                     approved["skin"] = patch["skin"]
-                for key, low, high in (("font", 13, 21), ("width", 300, 1600), ("height", 240, 1800)):
+                for key, low, high in (("font", 13, 21), ("width", 300, 1600), ("height", 240, 1800),('panelOpacity',20,100)):
                     if key in patch and type(patch[key]) in (int, float) and math.isfinite(patch[key]):
                         approved[key] = max(low, min(high, int(patch[key])))
                 if "edgeSide" in patch and patch["edgeSide"] in (None, "left", "right"):
@@ -208,7 +216,9 @@ class Bridge:
             if self._settings_process and self._settings_process.poll() is None:
                 return {"ok": True}
             self._settings_process = subprocess.Popen(
-                [self._base_python, str(ROOT / "ui" / "settings_v10.py")], cwd=ROOT,
+                [str(Path(os.environ.get('LOCALAPPDATA',''))/'SideQuestV10Runtime/Scripts/pythonw.exe')
+                 if (Path(os.environ.get('LOCALAPPDATA',''))/'SideQuestV10Runtime/Scripts/pythonw.exe').exists() else self._base_python,
+                 str(ROOT / "ui" / "settings_web_v11_3.py")], cwd=ROOT,
                 creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
             return {"ok": True}
         except OSError as exc:
@@ -276,13 +286,14 @@ class Bridge:
             history = [task_view(q, key) for key in ("main_quests", "side_quests")
                        for q in value.get(key, []) if q.get("status") == "done"]
             history.sort(key=lambda q: str(q.get("completed_at") or ""), reverse=True)
+            records=[task_view(q,key) for key in ('main_quests','side_quests') for q in value.get(key,[])]
             idle = read_json(self._data / "activity_status.json", {})
             try:
                 resting = bool(idle.get("suspended")) and time.time() - float(idle.get("checked_at", 0)) < 35
             except (TypeError, ValueError):
                 resting = False
             return {"ok": True, "current": task_view(current, "main_quests") if current else None,
-                    "others": others, "history": history, "activity": str(value.get("current_activity") or "暂无当前活动"),
+                    "others": others, "history": history, "records":records, "activity": str(value.get("current_activity") or "暂无当前活动"),
                     "suggestion": str(value.get("suggestion") or "暂无下一步建议"),
                     "updated_at": value.get("updated_at"), "paused": (self._data / "paused").exists(),
                     "resting": resting, "error": error, "prefs": copy.deepcopy(self._prefs),

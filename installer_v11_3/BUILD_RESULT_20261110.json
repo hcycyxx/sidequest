@@ -1,0 +1,12 @@
+{
+  "version": "SideQuest V11.3 Full Setup",
+  "installer": "C:\\Users\\Blank\\Desktop\\SideQuest_V11_3_FullSetup_20261110.exe",
+  "bytes": 453035658,
+  "sha256": "48ac5192faacd6ff3f06710b6450d17071f09e17022b590d973e1cadc33915df",
+  "build_completed": true,
+  "installer_executed_at_build": false,
+  "application_tested": false,
+  "model_tested": false,
+  "customer_data_included": false,
+  "credentials_included": false
+}

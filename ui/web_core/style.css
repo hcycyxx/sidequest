@@ -1,4 +1,4 @@
-html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#14171f}
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:transparent}
 #sidequest-app-main{height:100%;width:100%;color-scheme:dark}
 #sidequest-app-main[data-skin=journal]{color-scheme:light}
 #sidequest-app-main .sq-stage{position:static;width:100%;height:100%;min-height:0;overflow:hidden}
@@ -31,6 +31,17 @@ html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#
 #sidequest-app-main [data-title]{white-space:normal;overflow-wrap:anywhere;text-wrap:balance}
 #sidequest-app-main [data-progress]{white-space:pre-wrap}
 #sidequest-app-main input:disabled{opacity:.5}
+/* V11.3: background alpha is independent of all text and interactive content. */
+#sidequest-app-main{--sq-panel-opacity:100%;--sq-panel-surface:color-mix(in srgb,var(--sq-bg) var(--sq-panel-opacity),transparent);--sq-card-surface:color-mix(in srgb,var(--sq-hi) var(--sq-panel-opacity),transparent)}
+#sidequest-app-main .sq-window{background:var(--sq-panel-surface)}
+#sidequest-app-main .sq-next,#sidequest-app-main .sq-task,#sidequest-app-main .sq-menu,#sidequest-app-main .sq-edge-tab{background:var(--sq-card-surface)}
+#sidequest-app-main .sq-task-step-list:empty{display:none}
+#sidequest-app-main .sq-task-step-list{display:grid;gap:9px;margin-top:12px;font-size:12px;color:var(--sq-muted)}
+#sidequest-app-main .sq-task-step-list label{display:flex;align-items:flex-start;gap:8px;line-height:1.65}
+#sidequest-app-main .sq-task-step-list input[type=checkbox]{flex-shrink:0;margin-top:4px;accent-color:var(--sq-gold);width:14px;height:14px}
+#sidequest-app-main .sq-task-step-list label:has(input:checked) span{color:var(--sq-muted);text-decoration:line-through}
+#sidequest-app-main .sq-record-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+#sidequest-app-main .sq-record-filters button[aria-pressed=true]{background:var(--sq-hi);color:var(--sq-gold)}
 #sidequest-app-main .sq-empty{padding:16px 18px;color:var(--sq-muted);font-size:12px}
 #sidequest-app-main .sq-step-list label{align-items:flex-start}
 #sidequest-app-main .sq-step-list label span{overflow-wrap:anywhere}
@@ -87,13 +98,13 @@ html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#
 /* Unified rounded task cards and bounded, brighter completion sparks. */
 .sq-complete-spark{width:9px;height:3px;box-shadow:0 1px 5px rgba(153,207,255,.45)}
 #sidequest-app-main .sq-list-inner{display:flow-root}
-#sidequest-app-main .sq-task{position:relative;margin:10px 14px;padding:14px;border:1px solid color-mix(in srgb,var(--sq-muted) 15%,var(--sq-bg));border-radius:12px;background:color-mix(in srgb,var(--sq-hi) 34%,var(--sq-bg));transition:background-color 160ms ease-out,border-color 160ms ease-out}
-#sidequest-app-main .sq-task:hover{background:color-mix(in srgb,var(--sq-hi) 60%,var(--sq-bg));border-color:color-mix(in srgb,var(--sq-muted) 27%,var(--sq-bg))}
+#sidequest-app-main .sq-task{position:relative;margin:10px 14px;padding:14px;border:1px solid color-mix(in srgb,var(--sq-muted) 15%,var(--sq-bg));border-radius:12px;background:color-mix(in srgb,color-mix(in srgb,var(--sq-hi) 34%,var(--sq-bg)) var(--sq-panel-opacity),transparent);transition:background-color 160ms ease-out,border-color 160ms ease-out}
+#sidequest-app-main .sq-task:hover{background:color-mix(in srgb,color-mix(in srgb,var(--sq-hi) 60%,var(--sq-bg)) var(--sq-panel-opacity),transparent);border-color:color-mix(in srgb,var(--sq-muted) 27%,var(--sq-bg))}
 #sidequest-app-main .sq-task-heading{padding-right:23px}
 #sidequest-app-main .sq-task-name{border-radius:7px;user-select:none;padding:2px 4px;margin:-2px -4px}
 #sidequest-app-main .sq-title-toggle{border-radius:8px;user-select:none}
 #sidequest-app-main .sq-next{border-radius:12px}
-#sidequest-app-main .sq-next:hover{background:color-mix(in srgb,var(--sq-hi) 88%,var(--sq-bg))}
+#sidequest-app-main .sq-next:hover{background:color-mix(in srgb,color-mix(in srgb,var(--sq-hi) 88%,var(--sq-bg)) var(--sq-panel-opacity),transparent)}
 #sidequest-app-main .sq-card-grip{position:absolute;right:7px;top:10px;width:24px;height:28px;display:grid;place-items:center;padding:4px;border-radius:7px;color:var(--sq-muted);cursor:grab;touch-action:none;user-select:none}
 #sidequest-app-main .sq-card-grip svg{width:14px;height:14px;opacity:.75}
 #sidequest-app-main .sq-card-grip:active{cursor:grabbing;transform:none}

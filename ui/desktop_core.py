@@ -51,6 +51,10 @@ class Desktop:
         self._allow_destroy=False
         self._lifecycle=None
         self._maintenance_thread=None
+        self._view_revision=0
+        self._fit_order=(0,0)
+        self._geometry_audit_at=0.
+        self._before_minimize_h=620.
 
     def state(self):
         with self._lock:
@@ -58,7 +62,8 @@ class Desktop:
                     "height": round(self._height), "heightCap": self._height_cap,
                     "edgeSide": self._side, "edgeHidden": self._edge_hidden,
                     "autoHide": self._auto_hide, "pinned": self._pinned,
-                    "minimized": self._minimized, "trayAvailable": self._tray is not None}
+                    "minimized": self._minimized, "viewRevision": self._view_revision,
+                    "trayAvailable": self._tray is not None}
 
     def _screen(self, x=None, y=None):
         x = self._x + self._width / 2 if x is None else x
@@ -131,6 +136,7 @@ class Desktop:
 
     def _loaded_event(self):
         self._loaded = True
+        self._enable_background_alpha()
         self._round_corners()
         try:
             import tray
@@ -214,6 +220,8 @@ class Desktop:
             u,g = ctypes.windll.user32,ctypes.windll.gdi32
             u.SetWindowPos.argtypes = [wintypes.HWND,wintypes.HWND,ctypes.c_int,ctypes.c_int,ctypes.c_int,ctypes.c_int,ctypes.c_uint]
             u.SetWindowPos.restype = wintypes.BOOL
+            u.GetWindowRect.argtypes = [wintypes.HWND,ctypes.POINTER(wintypes.RECT)]
+            u.GetWindowRect.restype = wintypes.BOOL
             u.GetDpiForWindow.argtypes = [wintypes.HWND]
             u.GetDpiForWindow.restype = ctypes.c_uint
             u.SetWindowRgn.argtypes = [wintypes.HWND,wintypes.HRGN,wintypes.BOOL]
@@ -338,23 +346,64 @@ class Desktop:
             logging.warning('V10.1 geometry reverted to compatible path',exc_info=True)
             self._apply_compat()
 
+    def _actual_geometry(self):
+        hwnd,_=self._native();rect=wintypes.RECT()
+        if not ctypes.windll.user32.GetWindowRect(hwnd,ctypes.byref(rect)):
+            raise OSError('无法读取窗口实际尺寸')
+        return (rect.left,rect.top,rect.right-rect.left,rect.bottom-rect.top)
+
+    def _enable_background_alpha(self):
+        # Per-pixel composition: never use Form.Opacity, which also fades text.
+        try:
+            from System import Action
+            from System.Drawing import Color
+            native=self._window.native
+            def enable():
+                native.BackColor=Color.Black
+                if getattr(native,'webview',None) is not None:
+                    native.webview.DefaultBackgroundColor=Color.Transparent
+                margins=(ctypes.c_int*4)(-1,-1,-1,-1)
+                function=ctypes.windll.dwmapi.DwmExtendFrameIntoClientArea
+                function.argtypes=[wintypes.HWND,ctypes.c_void_p]
+                function.restype=ctypes.c_long
+                function(wintypes.HWND(int(native.Handle.ToInt64())),ctypes.byref(margins))
+            if native.InvokeRequired:native.Invoke(Action(enable))
+            else:enable()
+        except Exception:logging.warning('Background alpha setup unavailable',exc_info=True)
+
     def _apply(self):
-        # Resizing must update the managed WebView host, not only its outer HWND.
-        # Native position-only motion keeps V10.1's high-refresh fast path.
-        size=(round(self._width),round(self._height))
+        size=(round(self._width),round(self._height));now=time.monotonic()
+        if now>=self._geometry_audit_at:
+            self._geometry_audit_at=now+.5
+            try:
+                actual=self._actual_geometry();_,scale=self._native()
+                expected=(max(1,round(size[0]*scale)),max(1,round(size[1]*scale)))
+                if actual[2:]!=expected:self._managed_size=None
+                self._physical_geometry=actual
+            except Exception:self._managed_size=None;self._physical_geometry=None
         if size!=self._managed_size:
-            self._window.resize(*size)
-            self._managed_size=size
-            self._last_size=size
-            old=self._physical_geometry
-            if old is not None:
-                try:
-                    _,scale=self._native()
-                    self._physical_geometry=(old[0],old[1],max(1,round(self._width*scale)),max(1,round(self._height*scale)))
-                except Exception:
-                    self._physical_geometry=None
-            self._region_signature=None
-            self._round_corners()
+            try:
+                from System import Action
+                from System.Drawing import Size
+                native=self._window.native;_,scale=self._native()
+                physical=(max(1,round(size[0]*scale)),max(1,round(size[1]*scale)))
+                def resize_host():
+                    native.SuspendLayout()
+                    try:
+                        native.ClientSize=Size(*physical)
+                        if getattr(native,'webview',None) is not None:
+                            native.webview.Bounds=native.ClientRectangle
+                    finally:native.ResumeLayout(True)
+                if native.InvokeRequired:native.Invoke(Action(resize_host))
+                else:resize_host()
+            except Exception:
+                self._window.resize(*size)
+            actual=self._actual_geometry();_,scale=self._native()
+            expected=(max(1,round(size[0]*scale)),max(1,round(size[1]*scale)))
+            self._managed_size=size if actual[2:]==expected else None
+            self._last_size=self._managed_size
+            self._physical_geometry=actual
+            self._region_signature=None;self._round_corners()
         self._apply_fast()
 
     def _save_geometry(self):
@@ -396,6 +445,13 @@ class Desktop:
                     value=payload.get('height')
                     if type(value) not in (int,float) or not math.isfinite(value):raise ValueError('窗口高度不正确')
                     if self._gesture or self._edge_hidden:return {'ok':True,'applied':False}
+                    if payload.get('viewRevision',self._view_revision)!=self._view_revision:
+                        return {'ok':True,'applied':False}
+                    generation,revision=payload.get('generation',0),payload.get('revision',0)
+                    if type(generation) is not int or type(revision) is not int or min(generation,revision)<0:
+                        raise ValueError('窗口尺寸请求序号不正确')
+                    if (generation,revision)<self._fit_order:return {'ok':True,'applied':False}
+                    self._fit_order=(generation,revision)
                     cap=min(self._height_cap,self._screen()['bottom']-self._y)
                     self._target_h=max(80,min(float(value),cap));self._restore_h=self._target_h
                     return {'ok':True,'applied':True,'targetHeight':self._target_h}
@@ -420,7 +476,12 @@ class Desktop:
                     if phase=='resize':self._height=max(240,min(float(payload.get('height',self._height)),screen['bottom']-self._y));self._height_cap=round(self._height)
                     self._target_h=self._height;self._apply()
                     return {'ok':True,'desktop':self.state()}
-                if name=='minimize':self._reveal();self._minimized=not self._minimized
+                if name=='minimize':
+                    self._reveal()
+                    if not self._minimized:self._before_minimize_h=self._target_h
+                    self._minimized=not self._minimized;self._view_revision+=1
+                    self._target_h=80. if self._minimized else self._before_minimize_h
+                    self._restore_h=self._target_h
                 elif name=='hide':
                     if self._tray is None:raise ValueError('托盘不可用，请使用最小化')
                     self._hidden=True;self._window.hide()

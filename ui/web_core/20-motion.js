@@ -25,7 +25,8 @@
   let initialSteps=false;
   function settleInitialSteps(){if(initialSteps)return;initialSteps=true;stepsSummary.setAttribute('aria-expanded',String(state.stepsOpen));stepsPanel.open=true;stepsDisclosure.animate(true);}
   stepsSummary.addEventListener('click',event=>{event.preventDefault();stopScroll();state.stepsOpen=!state.stepsOpen;if(!state.stepsOpen&&stepsBody.contains(document.activeElement))stepsSummary.focus({preventScroll:true});stepsSummary.setAttribute('aria-expanded',String(state.stepsOpen));const h=stepsBody.hidden?0:stepsBody.getBoundingClientRect().height;stepsPanel.open=true;stepsBody.style.height=h+'px';stepsDisclosure.animate();savePrefs({stepsOpen:state.stepsOpen});});
-  let fitFrame=0,lastFit='',fitSending=false,fitActive=null,fitPending=null;
+  let fitFrame=0,lastFit='',fitSending=false,fitActive=null,fitPending=null,fitVersion=0,fitSequence=0,fitRetry=0;
+  const fitGeneration=Date.now();
   function contentHeight(body){
     const box=body.getBoundingClientRect(),style=getComputedStyle(body);
     const paddingBottom=parseFloat(style.paddingBottom)||0;
@@ -42,25 +43,27 @@
       while(fitPending){
         const next=fitPending;fitPending=null;fitActive=next;
         try{
-          const result=await bridge.window_action('fit',{height:next.height});
-          lastFit=result?.ok&&result.applied!==false?next.signature:'';
-        }catch(error){lastFit='';}
+          let timeout;
+          const result=await Promise.race([bridge.window_action('fit',{height:next.height,generation:fitGeneration,revision:next.sequence,viewRevision:next.viewRevision}),new Promise((_,reject)=>{timeout=setTimeout(()=>reject(new Error('fit timeout')),2500);})]).finally(()=>clearTimeout(timeout));
+          if(next.version===fitVersion)lastFit=result?.ok&&result.applied!==false?next.signature:'';
+          if(!lastFit&&!fitPending&&!fitRetry)fitRetry=setTimeout(()=>{fitRetry=0;requestFit(true);},350);
+        }catch(error){lastFit='';if(!fitPending&&!fitRetry)fitRetry=setTimeout(()=>{fitRetry=0;requestFit(true);},350);}
       }
     }finally{fitActive=null;fitSending=false;}
   }
   function requestFit(force=false){
-    if(force===true)lastFit='';
+    if(force===true){lastFit='';fitVersion++;}
     if(fitFrame||!bridge||geometry)return;
     fitFrame=requestAnimationFrame(()=>{
       fitFrame=0;if(state.desktop.edgeHidden||geometry)return;
       const body=state.desktop.minimized?q('.sq-mini-restore'):state.timeline?timelineView:state.settings?q('.sq-settings'):q('.sq-main-view');
       let height=Math.ceil(toolbar.getBoundingClientRect().height+contentHeight(body)+3);
       if(!q('#sq-menu').hidden)height=Math.max(height,toolbar.offsetHeight+q('#sq-menu').scrollHeight+16);
-      const signature=height+':'+state.desktop.heightCap;
+      const signature=[height,state.desktop.heightCap,state.desktop.viewRevision||0,fitVersion].join(':');
       if(fitPending?.signature===signature)return;
       if(fitSending&&!fitPending&&fitActive?.signature===signature)return;
       if(!fitSending&&!fitPending&&signature===lastFit)return;
-      fitPending={height,signature};pumpFit();
+      fitPending={height,signature,version:fitVersion,sequence:++fitSequence,viewRevision:state.desktop.viewRevision||0};pumpFit();
     });
   }
   // Smooth discrete mouse wheels; touchpads and touch scrolling keep native behavior.

@@ -2,7 +2,7 @@
   const root=document.getElementById('sidequest-app-main'), q=s=>root.querySelector(s);
   const win=q('.sq-window'), viewport=q('.sq-viewport'), toolbar=q('.sq-toolbar'), grip=q('.sq-resize-handle');
   const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const state={expanded:true,stepsOpen:false,settings:false,timeline:false,history:false,more:false,current:null,others:[],historyRows:[],prefs:{},desktop:{},paused:false,health:{},serviceBusy:false};
+  const state={expanded:true,stepsOpen:true,settings:false,timeline:false,history:false,historyFilter:'all',historyLimit:40,more:false,current:null,others:[],historyRows:[],records:[],prefs:{},desktop:{},paused:false,health:{},serviceBusy:false};
   const skins={glass:['#14171f','#232a38','#f1f5fc','#a8b7cc','#ffd166','#7de3f4','#5be3a2','#38465c'],transparent:['#182330','#2b3c4e','#ffffff','#cfdaea','#ffe1a0','#b3efff','#92efc3','#506479'],journal:['#f4efe3','#eae1ce','#342e29','#6b6054','#96623b','#396c73','#3c7052','#c6b9a2','#c6b9a2'],night:['#101b25','#1c2e3c','#edf8ff','#abc4d6','#8ae8ff','#c0b3ff','#68edb8','#3e566a']};
   const priorityPalettes={glass:['#9bbce8','#cbbfa3','#94a6be','#8bc8c2','#92cbb1'],transparent:['#a7c6ed','#d5c6a8','#a4b3c7','#a0d4ce','#9dcfb8'],journal:['#365d8a','#735b35','#526d7b','#386d69','#3f7056'],night:['#9ebee8','#c9c0aa','#9aaec5','#93cac4','#98cbb7']};
   function taskLevel(task){if(!task)return 'unknown';if(task.status==='done')return 'done';if(task.status==='waiting')return 'wait';const priority=String(task.priority||'').trim().toLowerCase();return ['high','mid','low'].includes(priority)?priority:'unknown';}
@@ -83,12 +83,13 @@
   function applyPrefs(prefs,initial=false){
     state.prefs={...state.prefs,...prefs};const p=state.prefs, colors=skins[p.skin]||skins.glass;
     ['bg','hi','fg','muted','gold','cyan','green','stroke'].forEach((key,i)=>root.style.setProperty('--sq-'+key,colors[i]));
-    root.dataset.skin=p.skin||'glass';document.body.style.backgroundColor=colors[0];
+    root.dataset.skin=p.skin||'glass';document.body.style.backgroundColor='transparent';
+    root.style.setProperty('--sq-panel-opacity',Math.max(20,Math.min(100,Number(p.panelOpacity??100)))+'%');
     const priorityColors=priorityPalettes[p.skin]||priorityPalettes.glass;['high','mid','low','wait','done'].forEach((key,index)=>root.style.setProperty('--sq-prio-'+key,priorityColors[index]));
     root.style.setProperty('--sq-size',Number(p.font||14)+'px');
     q('#sq-font').value=p.font||14;text('#sq-font-value',p.font||14);
     root.querySelectorAll('[name=sq-skin]').forEach(input=>input.checked=input.value===p.skin);
-    if(initial){state.expanded=p.expanded!==false;state.stepsOpen=p.stepsOpen===true;}
+    if(initial){state.expanded=p.expanded!==false;state.stepsOpen=p.stepsOpen!==false;}
   }
   function savePrefs(patch){
     dataEpoch++;

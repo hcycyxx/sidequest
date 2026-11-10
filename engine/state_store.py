@@ -64,6 +64,9 @@ def read_state(path):
         with open(path, encoding='utf-8') as f:
             value = json.load(f)
     except FileNotFoundError:
+        from task_archive_v11_3 import restore
+        recovered=restore(path)
+        if recovered is not None:return recovered
         return {'main_quests': [], 'side_quests': []}
     if not isinstance(value, dict):
         raise ValueError('任务数据格式不正确，未覆盖原文件')
@@ -72,6 +75,10 @@ def read_state(path):
 
 def _atomic_write(path, value):
     path = Path(path)
+    previous=None
+    if path.name=='quest_state.json':
+        if path.exists():
+            with path.open(encoding='utf-8') as stream:previous=json.load(stream)
     fd, name = tempfile.mkstemp(prefix=path.name + '.', suffix='.tmp', dir=path.parent)
     try:
         with os.fdopen(fd, 'w', encoding='utf-8') as f:
@@ -86,6 +93,14 @@ def _atomic_write(path, value):
                 if attempt == 7:
                     raise
                 time.sleep(.05)
+        if path.name=='quest_state.json':
+            # The JSON state is authoritative. Only archive after its commit succeeded.
+            try:
+                from task_archive_v11_3 import archive
+                archive(path,previous,value)
+            except Exception:
+                import logging
+                logging.warning('Task state saved; secondary task archive is temporarily unavailable',exc_info=True)
     finally:
         if os.path.exists(name):
             os.unlink(name)
@@ -158,15 +173,17 @@ def merge_ai_state(proposal, latest, max_active=8):
             ident = (str(q.get('id', '')), str(q.get('title', '')))
             prior = exact.get(ident)
             if prior is None and ident[0] in by_id:
-                candidate = by_id[ident[0]]
-                if candidate.get('status') != 'done':
-                    prior = candidate
-                else:
-                    # A new title reusing a finished ID must not overwrite history.
-                    q['id'] = ident[0] + '-' + hashlib.sha1(ident[1].encode()).hexdigest()[:6]
-                    prior = exact.get((str(q['id']), ident[1]))
-            q['steps'] = [s for s in q.get('steps', []) if isinstance(s, dict)] if isinstance(q.get('steps', []), list) else []
+                # A reused ID with a different title must never erase an earlier task.
+                q['id'] = ident[0] + '-' + hashlib.sha1(ident[1].encode()).hexdigest()[:10]
+                prior = exact.get((str(q['id']), ident[1]))
+            q['steps'] = [{**s,'text':str(s.get('text') or '').strip(),'done':False} for s in q.get('steps', [])
+                          if isinstance(s,dict) and str(s.get('text') or '').strip()] if isinstance(q.get('steps', []), list) else []
             if prior:
+                previous_steps={str(s.get('text','')).strip():bool(s.get('done')) for s in prior.get('steps',[]) if isinstance(s,dict)}
+                for step in q['steps']:
+                    step['done']=previous_steps.get(step['text'],False)
+                present={str(s.get('text','')).strip() for s in q['steps']}
+                q['steps'].extend(copy.deepcopy(s) for s in prior.get('steps',[]) if isinstance(s,dict) and str(s.get('text','')).strip() not in present)
                 used.add((str(prior.get('id', '')), str(prior.get('title', ''))))
                 manual = prior.get('_user_state')
                 if isinstance(manual, dict):
@@ -191,7 +208,7 @@ def merge_ai_state(proposal, latest, max_active=8):
                                 q.pop(field, None)
                             q['reopened_at'] = now()
                         else:
-                            q = copy.deepcopy(prior)
+                            q = {**copy.deepcopy(prior),'steps':q['steps']}
                     previous_steps = {str(s.get('text', '')).strip(): s.get('done') for s in prior.get('steps', [])}
                     for s in q['steps']:
                         if previous_steps.get(str(s.get('text', '')).strip()):
@@ -218,25 +235,20 @@ def merge_ai_state(proposal, latest, max_active=8):
                 q.setdefault('created_at', now())
             q = task_policy.normalize_task(q, prior)
             output.append(q)
-        # The model's abbreviated response is never an instruction to delete history
-        # or a task that the user has explicitly edited.
+        # An abbreviated response never deletes any prior task, including untouched work.
         for q in old:
             ident = (str(q.get('id', '')), str(q.get('title', '')))
-            if ident not in used and (q.get('status') == 'done' or q.get('_user_state')):
+            if ident not in used:
                 output.append(copy.deepcopy(q))
-        kept, ordinary = [], 0
+        kept = []
         seen = set()
         for q in output:
             ident = (str(q.get('id', '')), str(q.get('title', '')))
             if ident in seen:
                 continue
             seen.add(ident)
-            if q.get('status') == 'done' or q.get('_user_state'):
-                kept.append(q)
-            elif ordinary < max_active:
-                ordinary += 1
-                q['steps'] = q.get('steps', [])[:10]
-                kept.append(q)
+            # UI pagination may limit rendering; persistence must never limit tasks or steps.
+            kept.append(q)
         result[key] = kept
 
     # 面板顶部那块是常驻的：模型偶尔会回空字符串（这一轮它觉得"没什么可说的"），
