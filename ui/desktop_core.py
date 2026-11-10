@@ -55,6 +55,9 @@ class Desktop:
         self._fit_order=(0,0)
         self._geometry_audit_at=0.
         self._before_minimize_h=620.
+        self._closed_gestures=set()
+        self._active_gesture=None
+        self._gesture_stamp=0.
 
     def state(self):
         with self._lock:
@@ -249,6 +252,9 @@ class Desktop:
                     continue
                 try:
                     with self._lock:
+                        if self._gesture and now-self._gesture_stamp>.35 and not (ctypes.windll.user32.GetAsyncKeyState(0x01)&0x8000):
+                            self._end_gesture()
+                            self._publish()
                         if not self._hidden and self._side:
                             px, py = self._cursor()
                             inside = self._x <= px < self._x+self._width and self._y <= py < self._y+self._height
@@ -412,6 +418,10 @@ class Desktop:
         result=self._bridge.preferences(patch)
         if not result.get('ok'):raise OSError(result.get('error','窗口设置未保存'))
 
+    def _end_gesture(self):
+        if self._active_gesture:self._closed_gestures.add(self._active_gesture)
+        self._active_gesture=None;self._gesture=False
+
     def action(self,name,payload=None):
         payload=payload if isinstance(payload,dict) else {}
         try:
@@ -430,7 +440,13 @@ class Desktop:
                 self._publish();return {'ok':True,'desktop':self.state()}
             if name=='geometry' and payload.get('phase')=='end':
                 with self._lock:
-                    self._gesture=False;screen=self._screen()
+                    token=payload.get('gestureId')
+                    if payload.get('viewRevision',self._view_revision)!=self._view_revision:return {'ok':True,'desktop':self.state()}
+                    if token and self._active_gesture and token!=self._active_gesture:
+                        self._closed_gestures.add(token)
+                        return {'ok':True,'desktop':self.state()}
+                    if token:self._closed_gestures.add(token)
+                    self._end_gesture();screen=self._screen()
                     if payload.get('dock',True):
                         left=abs(self._x-screen['left']);right=abs(self._x+self._width-screen['right'])
                         if min(left,right)<=24:self._dock('left' if left<=right else 'right')
@@ -441,6 +457,11 @@ class Desktop:
                     self._width=336;self._height_cap=620;self._x,self._y=screen['right']-360,screen['top']+36
                 self._save_geometry();self._publish();return {'ok':True,'desktop':self.state()}
             with self._lock:
+                if name=='content-layout':
+                    if type(payload.get('expanded')) is not bool:raise ValueError('展开状态不正确')
+                    self._end_gesture();self._view_revision+=1;self._closed_gestures.clear()
+                    self._publish()
+                    return {'ok':True,'desktop':self.state()}
                 if name=='fit':
                     value=payload.get('height')
                     if type(value) not in (int,float) or not math.isfinite(value):raise ValueError('窗口高度不正确')
@@ -452,7 +473,8 @@ class Desktop:
                         raise ValueError('窗口尺寸请求序号不正确')
                     if (generation,revision)<self._fit_order:return {'ok':True,'applied':False}
                     self._fit_order=(generation,revision)
-                    cap=min(self._height_cap,self._screen()['bottom']-self._y)
+                    available=self._screen()['bottom']-self._y
+                    cap=available if payload.get('compact') is True else min(self._height_cap,available)
                     self._target_h=max(80,min(float(value),cap));self._restore_h=self._target_h
                     return {'ok':True,'applied':True,'targetHeight':self._target_h}
                 if name=='hold':
@@ -467,6 +489,12 @@ class Desktop:
                 if name=='geometry':
                     phase=payload.get('phase')
                     if phase not in ('move','resize'):raise ValueError('窗口操作不正确')
+                    token=payload.get('gestureId')
+                    if not isinstance(token,str) or not token or len(token)>200:raise ValueError('拖动标识不正确')
+                    if token in self._closed_gestures or payload.get('viewRevision')!=self._view_revision:
+                        return {'ok':True,'desktop':self.state()}
+                    if self._active_gesture and token!=self._active_gesture:self._end_gesture()
+                    self._active_gesture=token;self._gesture_stamp=time.monotonic()
                     for key in ('x','y','width','height'):
                         if key in payload and (type(payload[key]) not in (int,float) or not math.isfinite(payload[key]) or abs(payload[key])>100000):raise ValueError('窗口位置不正确')
                     self._gesture=True;self._target_x=None;self._velocity_x=self._velocity_h=0;self._side=None;self._edge_hidden=False
@@ -476,14 +504,9 @@ class Desktop:
                     if phase=='resize':self._height=max(240,min(float(payload.get('height',self._height)),screen['bottom']-self._y));self._height_cap=round(self._height)
                     self._target_h=self._height;self._apply()
                     return {'ok':True,'desktop':self.state()}
-                if name=='minimize':
-                    self._reveal()
-                    if not self._minimized:self._before_minimize_h=self._target_h
-                    self._minimized=not self._minimized;self._view_revision+=1
-                    self._target_h=80. if self._minimized else self._before_minimize_h
-                    self._restore_h=self._target_h
-                elif name=='hide':
-                    if self._tray is None:raise ValueError('托盘不可用，请使用最小化')
+                if name in ('minimize','hide'):
+                    if self._tray is None:raise ValueError('托盘尚未就绪，请稍后再试')
+                    self._end_gesture();self._minimized=False;self._view_revision+=1
                     self._hidden=True;self._window.hide()
                 elif name=='show':self._hidden=False;self._window.show();self._window.restore();self._reveal()
                 elif name=='reveal':self._reveal()

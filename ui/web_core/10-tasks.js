@@ -178,7 +178,7 @@
     q('[data-action=dock]').setAttribute('aria-pressed',String(state.prefs.autoHide!==false));text('[data-dock-label]',state.prefs.autoHide!==false?'贴边自动隐藏：开启':'贴边自动隐藏：关闭');
     root.querySelectorAll('[data-action=expand]').forEach(button=>button.setAttribute('aria-expanded',String(state.expanded)));text('[data-list-state]',state.expanded?'收起':'展开');
     q('.sq-main-view').hidden=state.settings||state.timeline||state.desktop.minimized;q('.sq-settings').hidden=!state.settings||state.desktop.minimized;timelineView.hidden=!state.timeline||state.desktop.minimized;q('.sq-mini-restore').hidden=!state.desktop.minimized;
-    const min=q('.sq-tools [data-action=minimize]');buttonIcon(min,state.desktop.minimized?'maximize-2':'minus');min.dataset.tooltip=state.desktop.minimized?'还原任务面板':'最小化为窄条';min.setAttribute('aria-label',min.dataset.tooltip);
+    const min=q('.sq-tools [data-action=minimize]');buttonIcon(min,'minus');min.dataset.tooltip='最小化到托盘';min.setAttribute('aria-label',min.dataset.tooltip);
     q('.sq-resize-handle').hidden=!!state.desktop.minimized;q('.sq-history').hidden=!state.history;icons();
   }
   function applyDesktop(value){if(!value||!Object.keys(value).length||(value.viewRevision||0)<(state.desktop.viewRevision||0))return;state.desktop=value;root.dataset.edge=value.edgeSide||'';root.dataset.hidden=String(!!value.edgeHidden);q('.sq-edge-tab').hidden=!value.edgeHidden;renderChrome();requestFit();}

@@ -55,8 +55,7 @@ class Tray:
     # ---------------------------------------------------------------- 菜单
     def _menu(self):
         items = []
-        items.append(pystray.MenuItem("打开今日总结", lambda: self._emit("summary"),
-                                      default=True))
+        items.append(pystray.MenuItem("打开今日总结", lambda: self._emit("summary")))
         hist = []
         for item in self._history[:12]:
             label = "%s%s" % (item["date"], "" if item.get("size") else "（空）")
@@ -67,7 +66,7 @@ class Tray:
         else:
             items.append(pystray.MenuItem("历史总结（暂无）", None, enabled=False))
         items.append(pystray.Menu.SEPARATOR)
-        items.append(pystray.MenuItem("显示 / 隐藏面板", lambda: self._emit("panel")))
+        items.append(pystray.MenuItem("显示 SideQuest", lambda: self._emit("panel"),default=True))
         items.append(pystray.MenuItem("立即生成总结", lambda: self._emit("generate")))
         items.append(pystray.MenuItem("详细设置…", lambda: self._emit("settings")))
         items.append(pystray.Menu.SEPARATOR)
