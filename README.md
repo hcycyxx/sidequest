@@ -4,7 +4,30 @@
   <p><img alt="Windows" src="https://img.shields.io/badge/platform-Windows-0078D6"> <img alt="源码 V11.4" src="https://img.shields.io/badge/source-V11.4-B56C43"> <a href="https://github.com/hcycyxx/sidequest/stargazers"><img alt="GitHub Stars" src="https://img.shields.io/github/stars/hcycyxx/sidequest?color=3B77A1"></a></p>
 </div>
 
-Windows 桌面任务面板：结合窗口轨迹与可配置的模型接口辅助整理任务。支持完成确认、任务步骤、时间轴、模型设置和每日总结。
+Windows AI 桌面任务面板：自动整理主线、支线和可勾选步骤，记录时间轴并生成日报。**内置 WorkBuddy 扫码桥接，可接入账号可用的 HY3 / HY4 等模型，在官方限免或账号免费额度内免费使用。** 也支持自填本地或云端兼容 API。
+
+## 本次更新：WorkBuddy 桥接
+
+- 在设置页扫码登录国内版 / 国际版 WorkBuddy，选择账号和模型后即可识别任务。
+- 可使用账号模型列表中的 **HY3、HY4** 等模型，无需另外填写云端 API Key。
+- 安装包已附带桥接与 Node.js，换电脑无需单独部署桥接；新电脑需要首次授权。
+- **想“白嫖”模型：使用官方标记为限免或账号享有免费额度的模型。** 活动时段、每日额度、地区及超额后的积分消耗，以 WorkBuddy 当前账号和模型页面为准；SideQuest 不提供永久、无限免费额度。
+- 同时更新了统一风格的托盘菜单、可关闭的错误提示、日报进度与自动重连。
+
+[WorkBuddy 模型说明](https://free-plat-test.qcloudcdn.com/docs/workbuddymini/features/Select-Model) · [本版完整更新记录](docs/RELEASE_V11_4_20261110.md)
+
+## 文件怎么找
+
+| 文件夹 / 入口 | 用途 |
+| --- | --- |
+| `ui/`、`engine/` | 当前界面、后台与任务逻辑 |
+| `bridge_workbuddy_v11_4/` | 复用的 WorkBuddy 桥接内核 |
+| `installer_v11_4/` | 当前安装包的构建源码 |
+| `docs/` | 使用、更新和发布文档 |
+| `archive/` | 旧入口、启动脚本和安装版源码 |
+| `sidequest_latest.py` | 最新版源码启动入口 |
+
+旧发布说明已归入 `docs/history/`。[完整目录导航](docs/REPOSITORY_LAYOUT.md) · [历史归档说明](archive/README.md)
 
 ## 效果预览
 
@@ -122,6 +145,6 @@ V11.2 安装版从 Windows 已安装应用中卸载，按版本说明默认保�
 
 ## 文档与许可
 
-[V11.3 改进与使用](RELEASE_Settings_V11_3_20261109.md) · [V11.2 安装说明](RELEASE_Installer_V11_2_20261107.md) · [V11.1 设置改进](RELEASE_Settings_V11_1_20261107.md) · [历史 README 原文](docs/README_legacy_before_20261109.md)
+[V11.3 改进与使用](docs/history/releases/RELEASE_Settings_V11_3_20261109.md) · [V11.2 安装说明](docs/history/releases/RELEASE_Installer_V11_2_20261107.md) · [V11.1 设置改进](docs/history/releases/RELEASE_Settings_V11_1_20261107.md) · [历史 README 原文](docs/README_legacy_before_20261109.md)
 
 历史 README 记录旧入口与行为，仅供回溯；其中相对路径按原仓库根目录解释。项目尚未声明独立开源许可证；第三方资源仍遵循各自许可，不能以依赖的许可证替代本项目授权。
