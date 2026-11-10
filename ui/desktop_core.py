@@ -58,6 +58,11 @@ class Desktop:
         self._closed_gestures=set()
         self._active_gesture=None
         self._gesture_stamp=0.
+        self._resize_gate=threading.Lock()
+        self._resize_pending=False
+        self._resize_request=None
+        self._resize_failed=False
+        self._content_motion_until=0.
 
     def state(self):
         with self._lock:
@@ -191,7 +196,8 @@ class Desktop:
 
     def _motion_active(self):
         return (not self._hidden and not self._gesture and
-                ((self._target_x is not None and abs(self._x-self._target_x) > .1)
+                ((time.monotonic()<self._content_motion_until)
+                 or (self._target_x is not None and abs(self._x-self._target_x) > .1)
                  or abs(self._height-self._target_h) > .1
                  or abs(self._velocity_x) > .1 or abs(self._velocity_h) > .1))
 
@@ -307,10 +313,10 @@ class Desktop:
         if not self._suppress_publish:
             self._publish_actual()
 
-    def _round_corners(self):
+    def _round_corners(self,actual_size=None):
         try:
             hwnd,scale = self._native()
-            width,height = max(1,round(self._width*scale)),max(1,round(self._height*scale))
+            width,height = actual_size or (max(1,round(self._width*scale)),max(1,round(self._height*scale)))
             signature = (width,height,round(28*scale))
             if signature == self._region_signature:
                 return
@@ -387,30 +393,46 @@ class Desktop:
                 if actual[2:]!=expected:self._managed_size=None
                 self._physical_geometry=actual
             except Exception:self._managed_size=None;self._physical_geometry=None
-        if size!=self._managed_size:
+        if self._resize_failed:
+            self._apply_compat();return
+        if size!=self._managed_size or self._resize_pending:
+            # At most one UI dispatch. Replace its payload instead of queueing old frames.
+            with self._resize_gate:
+                self._resize_request=(size,self._x,self._y)
+                if self._resize_pending:return
+                self._resize_pending=True
             try:
                 from System import Action
-                from System.Drawing import Size
-                native=self._window.native;_,scale=self._native()
-                physical=(max(1,round(size[0]*scale)),max(1,round(size[1]*scale)))
-                def resize_host():
-                    native.SuspendLayout()
-                    try:
-                        native.ClientSize=Size(*physical)
-                        if getattr(native,'webview',None) is not None:
-                            native.webview.Bounds=native.ClientRectangle
-                    finally:native.ResumeLayout(True)
-                if native.InvokeRequired:native.Invoke(Action(resize_host))
-                else:resize_host()
+                self._window.native.BeginInvoke(Action(self._resize_on_ui))
             except Exception:
-                self._window.resize(*size)
-            actual=self._actual_geometry();_,scale=self._native()
-            expected=(max(1,round(size[0]*scale)),max(1,round(size[1]*scale)))
-            self._managed_size=size if actual[2:]==expected else None
-            self._last_size=self._managed_size
-            self._physical_geometry=actual
-            self._region_signature=None;self._round_corners()
+                with self._resize_gate:self._resize_pending=False
+                self._resize_failed=True
+                logging.warning('Asynchronous resize unavailable; using compatible path',exc_info=True)
+                self._apply_compat()
+            return
         self._apply_fast()
+
+    def _resize_on_ui(self):
+        # Never take the desktop lock here: the UI dispatcher must stay non-blocking.
+        try:
+            if self._closing or self._hidden:return
+            with self._resize_gate:request=self._resize_request
+            if request is None:return
+            size,x,y=request;native=self._window.native;_,scale=self._native()
+            physical=(max(1,round(size[0]*scale)),max(1,round(size[1]*scale)))
+            native.SetBounds(round(x*scale),round(y*scale),*physical)
+            control=getattr(native,'webview',None)
+            if control is not None and control.Bounds!=native.ClientRectangle:
+                control.Bounds=native.ClientRectangle
+            actual=self._actual_geometry()
+            self._managed_size=size if actual[2:]==physical else None
+            self._last_size=self._managed_size;self._physical_geometry=actual
+            self._round_corners(actual[2:])
+        except Exception:
+            self._resize_failed=True
+            logging.warning('UI resize failed; using compatible path',exc_info=True)
+        finally:
+            with self._resize_gate:self._resize_pending=False
 
     def _save_geometry(self):
         with self._lock:
@@ -476,6 +498,10 @@ class Desktop:
                     available=self._screen()['bottom']-self._y
                     cap=available if payload.get('compact') is True else min(self._height_cap,available)
                     self._target_h=max(80,min(float(value),cap));self._restore_h=self._target_h
+                    # The browser already supplies spring-interpolated disclosure frames.
+                    # Follow those frames directly instead of applying a second spring.
+                    if payload.get('animating') is True:
+                        self._height=self._target_h;self._velocity_h=0.;self._content_motion_until=time.monotonic()+.12
                     return {'ok':True,'applied':True,'targetHeight':self._target_h}
                 if name=='hold':
                     self._hold=bool(payload.get('active'))

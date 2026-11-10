@@ -65,7 +65,7 @@ def main():
     script='(() => {\n'+'\n'.join(scripts)+'\n})();'
     html=html.replace('/*__LOCAL_APP__*/',script)
     desktop._window = webview.create_window(
-        "SideQuest V11.3.1", html=html, js_api=bridge, width=round(desktop._width), height=round(desktop._height),
+        "SideQuest V11.3.2", html=html, js_api=bridge, width=round(desktop._width), height=round(desktop._height),
         x=round(desktop._x), y=round(desktop._y), frameless=True, easy_drag=False, resizable=False,
         on_top=desktop._pinned, min_size=(300, 80), text_select=True, transparent=True, background_color="#000000")
     desktop._window.events.loaded += desktop._loaded_event
