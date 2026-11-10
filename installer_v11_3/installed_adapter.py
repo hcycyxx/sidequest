@@ -87,10 +87,40 @@ def configure(home):
             except (OSError,ValueError):data={}
             if not data.get('base_url') or not data.get('api_key'):
                 detail(self)
-                return {'ok':False,'error':'请先填写模型接口地址和密钥，保存后点击启动'}
+                return {'ok':False,'error':'请先填写这台电脑本地接口的地址和密钥，保存后点击启动'}
         return original_pause(self,paused)
     bridge_core.Bridge.pause=pause
 
 def open_settings():
-    from settings_web_v11_3 import main
-    return main()
+    import tkinter as tk
+    import paths
+    from settings_window import SettingsWindow,palette_from
+    palettes={
+      'glass':{'bg':'#14171f','hi':'#232a38','text':'#f1f5fc','muted':'#a8b7cc','gold':'#ffd166','cyan':'#7de3f4','green':'#5be3a2','family':'Microsoft YaHei UI'},
+      'transparent':{'bg':'#182330','hi':'#2b3c4e','text':'#ffffff','muted':'#cfdaea','gold':'#ffe1a0','cyan':'#b3efff','green':'#92efc3','family':'Microsoft YaHei UI'},
+      'journal':{'bg':'#f4efe3','hi':'#eae1ce','text':'#342e29','muted':'#6b6054','gold':'#96623b','cyan':'#396c73','green':'#3c7052','family':'SimSun'},
+      'night':{'bg':'#101b25','hi':'#1c2e3c','text':'#edf8ff','muted':'#abc4d6','gold':'#8ae8ff','cyan':'#c0b3ff','green':'#68edb8','family':'Microsoft YaHei UI'}}
+    try:prefs=json.loads(Path(paths.config('ui_v10.json')).read_text(encoding='utf-8'))
+    except (OSError,ValueError):prefs={}
+    root=tk.Tk();root.withdraw();asked=[False]
+    def saved(config,ui):
+        if asked[0] or not config.get('api_key'):return
+        asked[0]=True
+        from tkinter import messagebox
+        if not messagebox.askyesno('启动识别','配置已保存。现在启动后台开始识别窗口任务吗？',parent=window.top):return
+        def start():
+            try:
+                import process_control_v11
+                process_control_v11.start_workers()
+                window._results.put(('startup',None,None))
+            except Exception as exc:window._results.put(('startup',None,'后台未启动：'+str(exc)[:160]))
+        threading.Thread(target=start,daemon=False).start()
+    window=SettingsWindow(root,palette_from(palettes.get(prefs.get('skin'),palettes['glass'])),on_saved=saved)
+    def labels(parent):
+        for child in parent.winfo_children():
+            if isinstance(child,tk.Label) and child.cget('text')=='本地网关随便填；云端服务要填真 key':
+                child.configure(text='请填写目标电脑本地接口要求的密钥；便携包不带出原电脑密钥')
+            labels(child)
+    labels(window.top)
+    window.top.bind('<Destroy>',lambda event:root.quit() if event.widget is window.top else None)
+    root.mainloop();root.destroy()

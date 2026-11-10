@@ -69,11 +69,11 @@ def main():
     desktop._window = webview.create_window(
         "SideQuest V11.3", html=html, js_api=bridge, width=round(desktop._width), height=round(desktop._height),
         x=round(desktop._x), y=round(desktop._y), frameless=True, easy_drag=False, resizable=False,
-        on_top=desktop._pinned, min_size=(300, 80), text_select=True, transparent=True, background_color="#000000")
+        on_top=desktop._pinned, min_size=(300, 80), text_select=True, background_color="#14171f")
     desktop._window.events.loaded += desktop._loaded_event
     def first_setup():
         import paths
-        marker=Path(paths.config('first_setup_v11_3'))
+        marker=Path(paths.config('first_setup_v11_2'))
         try:
             config=json.loads(Path(paths.config('llm.json')).read_text(encoding='utf-8'))
             if not config.get('api_key') and not marker.exists():

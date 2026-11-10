@@ -54,3 +54,14 @@ config/activity_status.json
 config/llm_usage.jsonl
 config/task_records_v11_3/
 workbuddy_v11_4/
+
+# Preserved remote release exclusions
+# V11.3 isolated build and visual review
+.installer_build_v11_3/
+deliveries_v11_3_20261109/
+.ui_review_v11_3/
+# Preserved local drafts; V11.3 uses the v2 spec and v4 installer script.
+installer_v11_3/build_installed.spec
+installer_v11_3/SideQuestSetup.iss
+installer_v11_3/SideQuestSetup_v2.iss
+installer_v11_3/SideQuestSetup_v3.iss

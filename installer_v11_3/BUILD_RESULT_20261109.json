@@ -1,0 +1,17 @@
+{
+  "version": "SideQuest V11.3 Full Setup",
+  "installer": "D:\\Codex实验仓\\GitHub项目优化_v1_20261109\\sidequest\\deliveries_v11_3_20261109\\SideQuest_V11_3_FullSetup_20261109.exe",
+  "bytes": 453098782,
+  "sha256": "8fd245ef0c6781289705a3ba1fe74c9826ebfe95a174838df9c5a4a08abcd644",
+  "build_completed": true,
+  "installer_executed": false,
+  "application_package_tested": false,
+  "user_confirmed_caption_removed": true,
+  "user_confirmed_dragging": true,
+  "model_tested": false,
+  "network_tests_executed": false,
+  "credentials_included": false,
+  "customer_data_included": false,
+  "build_spec": "installer_v11_3/build_installed_v2.spec",
+  "installer_script": "installer_v11_3/SideQuestSetup_v4.iss"
+}
