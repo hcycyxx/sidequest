@@ -112,6 +112,7 @@ class Bridge:
         self._requests = {}
         self._summary_busy = False
         self._summary_error = ""
+        self._summary_state={'id':None,'phase':'idle','message':''}
         self._summary_retry = 0
         self._settings_process = None
         self._message = ""
@@ -218,7 +219,7 @@ class Bridge:
             self._settings_process = subprocess.Popen(
                 [str(Path(os.environ.get('LOCALAPPDATA',''))/'SideQuestV10Runtime/Scripts/pythonw.exe')
                  if (Path(os.environ.get('LOCALAPPDATA',''))/'SideQuestV10Runtime/Scripts/pythonw.exe').exists() else self._base_python,
-                 str(ROOT / "ui" / "settings_web_v11_3.py")], cwd=ROOT,
+                 str(ROOT / "ui" / "settings_web_v11_4.py")], cwd=ROOT,
                 creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
             return {"ok": True}
         except OSError as exc:
@@ -240,16 +241,22 @@ class Bridge:
                 return {"ok": True, "message": "日报正在生成，请稍候"}
             self._summary_busy = True
             self._summary_error = ""
+            self._summary_state={'id':uuid.uuid4().hex,'phase':'working','message':'正在汇总任务与窗口记录'}
         def build():
+            def stage(message):
+                with self._lock:self._summary_state={**self._summary_state,'message':message}
             try:
-                result = ds.build(selected)
+                result = ds.build(selected,on_progress=stage)
                 if not result or not Path(result).is_file():
                     raise RuntimeError("日报未生成，请稍后重试")
                 ds.mark_auto(selected)
+                with self._lock:self._summary_state={**self._summary_state,'phase':'done','message':'日报已生成'}
                 if generate != "automatic":
-                    os.startfile(result)
+                    try:os.startfile(result)
+                    except OSError:stage('日报已生成，请从“今日总结”打开')
             except Exception as exc:
                 self._summary_error = str(exc)[:200]
+                with self._lock:self._summary_state={**self._summary_state,'phase':'error','message':'日报生成失败：'+self._summary_error}
                 self._summary_retry = time.monotonic() + 300
             finally:
                 self._summary_busy = False
@@ -297,7 +304,7 @@ class Bridge:
                     "suggestion": str(value.get("suggestion") or "暂无下一步建议"),
                     "updated_at": value.get("updated_at"), "paused": (self._data / "paused").exists(),
                     "resting": resting, "error": error, "prefs": copy.deepcopy(self._prefs),
-                    "summaryBusy": self._summary_busy, "summaryError": self._summary_error,
+                    "summaryBusy": self._summary_busy, "summaryError": self._summary_error,'summaryState':copy.deepcopy(self._summary_state),
                     "message": self._message, "desktop": self._controller.state() if self._controller else {}}
 
     def _data_task_action(self, request):

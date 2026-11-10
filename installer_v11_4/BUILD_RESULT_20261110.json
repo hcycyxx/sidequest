@@ -1,0 +1,13 @@
+{
+  "version": "SideQuest V11.4 Full Setup",
+  "installer": "C:\\Users\\Blank\\Desktop\\SideQuest_最新安装包_V11.4.exe",
+  "bytes": 484086197,
+  "sha256": "747f7996fc97b2d77c5864cab45f496c4bede7868c68e522f71ae16d345cc770",
+  "build_completed": true,
+  "application_tested": false,
+  "model_tested": false,
+  "oauth_tested": false,
+  "customer_data_included": false,
+  "credentials_included": false,
+  "includes_node_runtime": true
+}

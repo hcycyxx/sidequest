@@ -128,3 +128,17 @@ html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:t
 @media(prefers-reduced-motion:reduce){#sidequest-app-main .sq-timeline-fill{transition:none}}
 
 #sidequest-app-main .sq-engine-notice{margin:0 18px 12px;font-size:11px;line-height:1.7;color:var(--sq-gold);overflow-wrap:anywhere}
+#sidequest-app-main .sq-engine-notice{display:flex;align-items:flex-start;gap:8px}
+#sidequest-app-main .sq-engine-notice>span{flex:1;min-width:0}
+#sidequest-app-main .sq-engine-notice .sq-icon{width:22px;height:22px;padding:4px;color:inherit;flex-shrink:0}
+#sidequest-app-main .sq-feedback{position:relative;flex-wrap:wrap;padding-bottom:12px}
+#sidequest-app-main .sq-feedback [data-message]{flex:1;min-width:0}
+#sidequest-app-main .sq-feedback-close{width:23px;height:23px;padding:4px;color:inherit;flex-shrink:0}
+#sidequest-app-main .sq-notice-progress{flex-basis:100%;height:3px;background:color-mix(in srgb,currentColor 15%,transparent);border-radius:3px;overflow:hidden}
+#sidequest-app-main .sq-notice-progress>span{display:block;height:100%;background:currentColor;transform-origin:left}
+#sidequest-app-main [data-progress=none]>.sq-notice-progress{display:none}
+#sidequest-app-main [data-progress=waiting]>.sq-notice-progress>span{width:30%;animation:sq-notice-wait 1.5s cubic-bezier(.45,0,.55,1) infinite}
+#sidequest-app-main [data-progress=countdown]>.sq-notice-progress>span{width:100%}
+@keyframes sq-notice-wait{from{transform:translateX(-110%)}to{transform:translateX(440%)}}
+@keyframes sq-notice-countdown{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+@media(prefers-reduced-motion:reduce){#sidequest-app-main .sq-notice-progress>span{animation:none!important}}

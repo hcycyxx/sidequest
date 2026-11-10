@@ -201,7 +201,12 @@ def _ask_llm(cfg, user_msg, timeout=60):
     """总结用的最小调用：不重试、不抛错，失败就当没有模型可用。"""
     if not cfg.get("api_key") or not cfg.get("base_url"):
         return ""
-    body = json.dumps({
+    if cfg.get('connection_mode')=='workbuddy':
+        try:
+            from workbuddy_v11_4 import WorkBuddy
+            cfg={**cfg,**WorkBuddy().connection()}
+        except Exception:return ''
+    parameters={
         "model": cfg.get("model"),
         "messages": [
             {"role": "system", "content": (
@@ -213,15 +218,21 @@ def _ask_llm(cfg, user_msg, timeout=60):
         ],
         "temperature": 0.3,
         "max_tokens": 700,
-    }).encode("utf-8")
+    }
+    from urllib.parse import urlsplit
+    if urlsplit(str(cfg.get('base_url') or '')).hostname=='api.deepseek.com':
+        parameters.update(thinking={'type':'disabled'},response_format={'type':'json_object'},max_tokens=1500)
+    body=json.dumps(parameters).encode('utf-8')
     req = urllib.request.Request(
         str(cfg["base_url"]).rstrip("/") + "/chat/completions", data=body,
         headers={"Content-Type": "application/json",
                  "Authorization": "Bearer %s" % cfg.get("api_key")})
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
+        from llm_engine_runtime_v11_4 import NoRedirect
+        with urllib.request.build_opener(NoRedirect()).open(req, timeout=timeout) as resp:
             data = json.loads(resp.read().decode("utf-8"))
-        return data["choices"][0]["message"]["content"]
+        content=data["choices"][0]["message"]["content"]
+        return content if isinstance(content,str) else ''
     except Exception:
         return ""
 
@@ -337,16 +348,20 @@ def collect(day=None, use_llm=True):
     }
 
 
-def build(day=None, use_llm=True):
+def build(day=None, use_llm=True,on_progress=None):
     """Write a new dated version; an existing report is never overwritten."""
     day=day or datetime.now(TZ).date()
-    html=summary_html.render(collect(day,use_llm=use_llm))
+    if on_progress:on_progress('正在汇总任务与窗口记录')
+    data=collect(day,use_llm=use_llm)
+    if on_progress:on_progress('正在排版日报')
+    html=summary_html.render(data)
     try:
         os.makedirs(OUT,exist_ok=True)
         import uuid
         path=os.path.join(OUT,day.isoformat()+"_"+datetime.now(TZ).strftime("%H%M%S_%f")+"_"+uuid.uuid4().hex[:6]+".html")
         with open(path,"x",encoding="utf-8") as f:
             f.write(html)
+        if on_progress:on_progress('日报已生成')
         return path
     except OSError:
         return ""

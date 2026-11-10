@@ -133,6 +133,15 @@ html,body{margin:0;height:100%;width:100%;overflow:hidden;background:#14171f}
 #sq-settings-preview .sq-toolbar button{-webkit-app-region:no-drag}
 #sq-settings-preview .sq-input,#sq-settings-preview .sq-select,#sq-settings-preview .sq-prompt-input{background:var(--sq-hi)}
 #sq-settings-preview .sq-nav{background:color-mix(in srgb,var(--sq-hi) 45%,var(--sq-bg))}
+
+#sq-settings-preview .sq-wb-qr{display:grid;justify-items:center;gap:12px;padding:20px 0}
+#sq-settings-preview .sq-wb-qr img{background:white;padding:10px;border-radius:10px;max-width:100%;object-fit:contain}
+#sq-settings-preview #sqp-wb-status{margin-top:13px;color:var(--sq-green)}
+#sq-settings-preview #sqp-wb-status[data-error=true]{color:#e2a3a3}
+#sq-settings-preview .sq-wb-progress{height:3px;overflow:hidden;border-radius:3px;background:color-mix(in srgb,var(--sq-green) 15%,transparent);margin-top:8px;display:none}
+#sq-settings-preview .sq-wb[data-busy=true] .sq-wb-progress,#sq-settings-preview .sq-wb[data-waiting=true] .sq-wb-progress{display:block}
+#sq-settings-preview .sq-wb-progress span{display:block;width:30%;height:100%;background:var(--sq-green);animation:sqp-wb-wait 1.5s ease-in-out infinite}
+@keyframes sqp-wb-wait{from{transform:translateX(-110%)}to{transform:translateX(440%)}}
 </style>
   <section class="sq-dialog" aria-label="SideQuest 设置">
     <header class="sq-toolbar pywebview-drag-region">
@@ -151,6 +160,15 @@ html,body{margin:0;height:100%;width:100%;overflow:hidden;background:#14171f}
       </nav>
       <form novalidate>
         <section class="sq-panel" id="sqp-model" role="tabpanel" aria-labelledby="sqp-tab-model">
+          <div class="sq-field"><label class="sq-label" for="sqp-provider">连接方式</label><select class="sq-select" id="sqp-provider"><option value="manual">API 接口 · 本地或云端</option><option value="workbuddy">WorkBuddy · 扫码登录</option></select></div>
+          <section id="sqp-workbuddy" class="sq-wb" aria-label="WorkBuddy 账号连接" data-busy="false" hidden>
+            <div class="sq-field"><label class="sq-label" for="sqp-wb-region">账号区域</label><select class="sq-select" id="sqp-wb-region"><option value="cn">国内版</option><option value="global">国际版</option></select></div>
+            <div class="sq-actions"><button type="button" class="sq-button" data-wb="login"><i data-lucide="qr-code" aria-hidden="true"></i>扫码登录</button><button type="button" class="sq-button sq-ghost" data-wb="import">读取本机登录</button><button type="button" class="sq-button sq-ghost" data-wb="refresh">刷新账号</button></div>
+            <div id="sqp-wb-qr" class="sq-wb-qr" hidden><img alt="WorkBuddy 官方授权二维码" width="180" height="180"><p class="sq-hint">扫描后在官方页面确认授权。二维码十分钟内有效。</p><div class="sq-actions"><button type="button" class="sq-button" data-wb="open">Chrome 中授权</button><button type="button" class="sq-button sq-ghost" data-wb="cancel">取消登录</button></div></div>
+            <p id="sqp-wb-status" class="sq-hint" role="status" aria-live="polite">请选择国内版或国际版后扫码登录。</p><div class="sq-wb-progress" aria-hidden="true"><span></span></div>
+            <div class="sq-field" style="margin-top:15px"><label class="sq-label" for="sqp-wb-accounts">已登录账号</label><select class="sq-select" id="sqp-wb-accounts"><option value="">请先扫码登录</option></select></div><button type="button" class="sq-button" data-wb="select">使用此账号</button>
+            <p class="sq-hint" style="margin-top:10px">选用后会填入本机连接信息，请获取模型并保存。账号仅保存在这台电脑，不修改 Codex 或 CC Switch。</p><hr class="sq-divider">
+          </section>
           <div class="sq-field"><label class="sq-label" for="sqp-url">接口地址</label><input class="sq-input" id="sqp-url" type="url" value="http://127.0.0.1:8899/v1" spellcheck="false" aria-describedby="sqp-url-hint"><p class="sq-hint" id="sqp-url-hint">支持本地桥接或官方兼容接口。DeepSeek 官方地址：https://api.deepseek.com</p></div>
           <div class="sq-field"><label class="sq-label" for="sqp-key">API Key</label><div class="sq-key-wrap"><input class="sq-input" id="sqp-key" type="password" autocomplete="off" placeholder="输入接口密钥" aria-describedby="sqp-key-hint"><button class="sq-icon cursor-interaction" type="button" data-action="key" aria-label="显示密钥" aria-pressed="false"><i data-lucide="eye" aria-hidden="true"></i></button></div><p class="sq-hint" id="sqp-key-hint">密钥仅保存在这台电脑，不写入连接检查日志。</p></div>
           <div class="sq-field"><label class="sq-label" for="sqp-model-name">模型名称</label><div class="sq-combo"><input class="sq-input" id="sqp-model-name" value="deepseek-v4.1-flash" role="combobox" aria-autocomplete="none" aria-controls="sqp-model-options" aria-expanded="false" spellcheck="false"><button class="sq-icon cursor-interaction" type="button" data-action="models" aria-label="展开模型列表"><i data-lucide="chevron-down" aria-hidden="true"></i></button><div class="sq-model-list" id="sqp-model-options" role="listbox" aria-label="模型列表" hidden></div></div><p class="sq-hint">可手动输入，或从获取的模型列表中选择。</p></div>
@@ -181,7 +199,7 @@ html,body{margin:0;height:100%;width:100%;overflow:hidden;background:#14171f}
     </div>
   </section>
   <div class="sq-reopen" hidden><button class="sq-button sq-primary cursor-interaction" type="button" data-action="reopen">重新打开设置</button></div>
-  <script>/*__SETTINGS_JS__*/</script>
+  <script>/*__SETTINGS_JS__*/</script><script>/*__WORKBUDDY_JS__*/</script>
 </div>
 
 </body></html>

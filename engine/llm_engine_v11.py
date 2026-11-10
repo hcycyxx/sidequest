@@ -1,7 +1,7 @@
 """Original inference behavior, with explicit success/error telemetry on normal requests."""
 from pathlib import Path
 import time
-import llm_engine_runtime_v11_3 as engine
+import llm_engine_runtime_v11_4 as engine
 import paths
 import state_store as store
 
@@ -15,7 +15,7 @@ def main():
     def log(message):
         original(message)
         if message.startswith(('状态已更新','无变化','内容相同，跳过写入')):
-            state.update(lastSuccess=time.time(),lastEngineError='',phase='idle')
+            state.update(lastSuccess=time.time(),lastEngineError='',phase='idle',nextRetryAt=None)
         elif message.startswith('提交原因：'):
             state.update(lastAttempt=time.time(),phase='analyzing')
         elif message.startswith('错误:'):
@@ -26,9 +26,16 @@ def main():
                     '接口或模型未找到，请核对地址和模型名称' if '404' in lower else
                     '接口限流，正在等待重试' if '429' in lower else
                     '模型请求超时，正在等待重试' if 'timed out' in lower or 'timeout' in lower else
+                    '网络连接暂时中断，正在自动重连' if 'urlerror' in lower or 'connection' in lower or 'reset' in lower or '远程主机' in lower else
+                    '模型服务暂时不可用，正在自动重连' if 'httperror' in lower or any(str(code) in lower for code in (500,502,503,504)) else
                     '模型返回格式不符合任务JSON要求' if 'json' in lower or 'boolean changed' in lower else
                     '后台识别失败：'+message.split(':',2)[1].strip()[:60])
             state.update(lastFailure=time.time(),lastEngineError=reason,phase='error')
+        elif message.startswith(('网络重试：','等待重试：')):
+            try:delay=float(message.split('：',1)[1])
+            except ValueError:delay=60
+            state.update(phase='retrying',nextRetryAt=time.time()+delay)
+            if not state.get('lastEngineError'):state.update(lastEngineError='网络请求暂时失败，正在自动重连',lastFailure=time.time())
         elif message.startswith('连接配置已变化'):
             state.update(phase='waiting',lastEngineError='')
         else:return

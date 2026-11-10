@@ -53,3 +53,4 @@ config/activity_status.json
 
 config/llm_usage.jsonl
 config/task_records_v11_3/
+workbuddy_v11_4/

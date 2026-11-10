@@ -60,14 +60,21 @@
     }catch(error){feedback(error.message,true);reconcileButton.hidden=false;}
     finally{reconcileButton.disabled=false;}
   });
-  let feedbackTimer=null,feedbackAnimation=null,feedbackVersion=0;
+  let feedbackTimer=null,feedbackAnimation=null,feedbackVersion=0,feedbackCountdown=null;
+  const feedbackClose=el('button','sq-icon sq-feedback-close');feedbackClose.type='button';feedbackClose.setAttribute('aria-label','关闭提示');feedbackClose.append(icon('x'));q('.sq-feedback').append(feedbackClose);
+  const feedbackProgress=el('div','sq-notice-progress'),feedbackFill=el('span');feedbackProgress.append(feedbackFill);feedbackProgress.setAttribute('aria-hidden','true');q('.sq-feedback').append(feedbackProgress);
+  feedbackClose.addEventListener('click',()=>{if(uncertainOperation)return;feedbackVersion++;clearTimeout(feedbackTimer);feedbackAnimation?.cancel();q('.sq-feedback').hidden=true;undoToken=null;feedbackKind='';requestFit(true);});
   function feedback(message,error=false,token=null){
     feedbackVersion++;clearTimeout(feedbackTimer);feedbackTimer=null;
     if(feedbackAnimation){feedbackAnimation.cancel();feedbackAnimation=null;}
     const panel=q('.sq-feedback');panel.style.overflow='';panel.classList.remove('sq-completed-leaving');panel.hidden=false;panel.dataset.error=String(error);
+    feedbackClose.disabled=!!uncertainOperation;
+    const waiting=!error&&/正在|处理中|等待|启动中|生成中/.test(String(message));panel.dataset.progress=waiting?'waiting':error?'none':'countdown';
+    feedbackCountdown?.cancel();feedbackCountdown=null;
+    if(!waiting&&!error&&!reduced())feedbackCountdown=feedbackFill.animate?.([{transform:'scaleX(1)'},{transform:'scaleX(0)'}],{duration:10000,fill:'forwards'});
     panel.setAttribute('role',error?'alert':'status');text('[data-message]',message);
     undoToken=token;q('[data-action=undo]').hidden=!token;feedbackKind=error?'error':'action';requestFit(true);
-    if(!error&&(token||String(message).startsWith('已'))){
+    if(!error&&!waiting){
       const version=feedbackVersion;
       async function dismiss(){
         if(version!==feedbackVersion||panel.hidden)return;

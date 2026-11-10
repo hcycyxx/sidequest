@@ -22,7 +22,7 @@
   function opacity(){const amount=Number(q('#sqp-opacity').value);q('#sqp-opacity-value').value=amount+'%';q('.sq-mini').style.setProperty('--sq-panel-opacity',String(amount/100));}
   function font(){q('#sqp-font-value').value=q('#sqp-font').value;q('[data-type-sample]').style.fontSize=(Number(q('#sqp-font').value)+4)+'px';}
   function count(){q('[data-prompt-count]').value=Array.from(prompt.value).length+' 字';}
-  function collect(){const data={};for(const [key,selector] of Object.entries(fields))data[key]=q(selector).value;data.content_capture=q('#sqp-capture').checked;data.doc_read=q('#sqp-doc').checked;data.content_level=q('[name=sqp-level]:checked').value;return data;}
+  function collect(){const data={};for(const [key,selector] of Object.entries(fields))data[key]=q(selector).value;data.content_capture=q('#sqp-capture').checked;data.doc_read=q('#sqp-doc').checked;data.content_level=q('[name=sqp-level]:checked').value;data.connection_mode=q('#sqp-provider').value;return data;}
   async function invoke(name,...args){if(!api)throw Error('设置尚未连接，请稍后再试。');const result=await api[name](...args);if(!result?.ok)throw Error(result?.error||'操作未完成，请稍后再试。');return result;}
   async function connectionAction(mode){
     if(busy||!loaded)return;busy=true;qa('[data-action=fetch],[data-action=check]').forEach(button=>button.disabled=true);q('.sq-connection').dataset.state='loading';connection.textContent=mode==='fetch'?'正在获取模型…':'正在检测接口连通性…';
@@ -71,7 +71,8 @@
       qa('[name=sqp-level]').forEach(input=>input.checked=input.value===data.config.content_level);
       const palettes={glass:['#14171f','#232a38','#f1f5fc','#a8b7cc','#ffd166','#92cbb1','#38465c'],transparent:['#182330','#2b3c4e','#ffffff','#cfdaea','#ffe1a0','#9dcfb8','#506479'],journal:['#f4efe3','#eae1ce','#342e29','#6b6054','#96623b','#3c7052','#c6b9a2'],night:['#101b25','#1c2e3c','#edf8ff','#abc4d6','#8ae8ff','#68edb8','#3e566a']};
       const colors=palettes[data.skin]||palettes.glass;['bg','hi','fg','muted','gold','green','stroke'].forEach((name,index)=>root.style.setProperty('--sq-'+name,colors[index]));root.style.setProperty('--sq-quiet',colors[6]+'77');root.style.colorScheme=data.skin==='journal'?'light':'dark';document.body.style.backgroundColor=colors[0];
-      opacity();font();count();icons();loaded=true;controls(false);initial=collect();notice('修改后点击保存设置。');
+      q('#sqp-provider').value=data.config.connection_mode||'manual';
+      opacity();font();count();icons();loaded=true;controls(false);initial=collect();notice('修改后点击保存设置。');root.dispatchEvent(new CustomEvent('sidequest:settings-loaded',{detail:data}));
     }catch(error){notice('设置读取失败：'+error.message+' 请关闭后重新打开。',true);}
   }
   window.addEventListener('pywebviewready',ready);if(window.pywebview?.api)ready();

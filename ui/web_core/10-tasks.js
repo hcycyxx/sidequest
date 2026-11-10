@@ -165,10 +165,16 @@
     text('[data-next]',snapshot.suggestion);text('.sq-observation p',snapshot.activity);
     const date=snapshot.updated_at?new Date(snapshot.updated_at):null;
     text('[data-updated]',date&&!Number.isNaN(date.getTime())?'更新于 '+date.toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}):state.health.lastSuccess?'识别于 '+new Date(state.health.lastSuccess).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}):'等待首次识别');
-    if(controlNotice&&!state.serviceBusy){controlNotice=false;if(state.health.error)feedback('后台切换失败：'+state.health.error,true);else if(state.paused)feedback('已暂停后台');else if(state.health.running)feedback('已启动后台，正在等待识别结果');else feedback('后台未就绪，请查看后台状态',true);}
+    if(controlNotice&&!state.serviceBusy){controlNotice=false;if(state.health.error)feedback('后台切换失败：'+state.health.error,true);else if(state.paused)feedback('已暂停后台');else if(state.health.running){feedback('已启动后台，正在等待识别结果');feedbackKind='startup';}else feedback('后台未就绪，请查看后台状态',true);}
+    if(feedbackKind==='startup'){
+      if(state.health.lastEngineError)feedback(state.health.lastEngineError,true);
+      else if(state.paused)feedback('已暂停后台');
+      else if(state.health.enginePhase==='idle'&&state.health.lastSuccess)feedback('已完成识别，任务已同步');
+    }
     if(snapshot.error){feedback(snapshot.error,true);feedbackKind='read';}else if(feedbackKind==='read'){q('.sq-feedback').hidden=true;feedbackKind='';}
     if(snapshot.summaryError&&snapshot.summaryError!==lastSummaryError)feedback('日报生成失败：'+snapshot.summaryError,true);
     lastSummaryError=snapshot.summaryError;
+    renderSummaryNotice(snapshot);
     renderChrome();syncTaskList(true);settleInitialSteps();requestFit();
   }
   function renderChrome(){
@@ -185,10 +191,23 @@
   window.sidequestDesktop=applyDesktop;
   function menu(open){q('#sq-menu').hidden=!open;q('#sq-menu').style.top=(toolbar.offsetHeight+4)+'px';q('[data-action=menu]').setAttribute('aria-expanded',String(open));setHold('menu',open);requestFit();}
   const healthView=el('details','sq-health'),healthHeading=el('summary','','后台状态'),healthText=el('p','');healthView.append(healthHeading,healthText);q('.sq-settings').insertBefore(healthView,q('.sq-settings .sq-return'));
-  const engineNotice=el('p','sq-engine-notice');engineNotice.hidden=true;q('.sq-main-view').insertBefore(engineNotice,q('.sq-feedback'));
+  const engineNotice=el('div','sq-engine-notice'),engineMessage=el('span'),engineClose=el('button','sq-icon');engineClose.type='button';engineClose.setAttribute('aria-label','关闭识别提示');engineClose.append(icon('x'));engineNotice.append(engineMessage,engineClose);engineNotice.hidden=true;q('.sq-main-view').insertBefore(engineNotice,q('.sq-feedback'));
+  let dismissedEngine='',summaryNoticeKey='',dismissedSummary='';
+  const engineKey=()=>[state.health?.lastEngineError||'',state.health?.lastFailure||''].join(':');
+  engineClose.addEventListener('click',()=>{dismissedEngine=engineKey();engineNotice.hidden=true;requestFit(true);});
+  feedbackClose.addEventListener('click',()=>{if(feedbackKind==='summary')dismissedSummary=summaryNoticeKey.split(':')[0];},{capture:true});
+  function renderSummaryNotice(snapshot){
+    const operation=snapshot.summaryState;if(!operation?.id||dismissedSummary===operation.id)return;
+    const key=[operation.id,operation.phase,operation.message].join(':');if(key===summaryNoticeKey)return;
+    if(operation.phase==='working'&&pending)return;
+    summaryNoticeKey=key;feedback(operation.message||'正在生成日报',operation.phase==='error');feedbackKind='summary';
+    q('.sq-feedback').dataset.progress=operation.phase==='working'?'waiting':operation.phase==='error'?'none':'countdown';
+  }
   function updateHealthView(){
     const h=state.health||{},status=role=>h.workers?.[role]?.length?'运行中':'未运行或待核验';
     const success=h.lastSuccess?new Date(h.lastSuccess).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai'}):'暂无成功识别记录';
     const lines=['窗口监测：'+status('win_watch'),'任务识别：'+status('llm_engine'),'最近成功识别：'+success+(h.successSource==='engine-log'?'（日志记录）':''),h.busy?'正在'+(h.operation||'切换后台'):'',h.error?'状态核验：'+h.error:'',h.lastEngineError?'识别提示：'+h.lastEngineError:''].filter(Boolean).join('\n');
-    if(healthText.textContent!==lines)healthText.textContent=lines;engineNotice.hidden=state.paused||!h.lastEngineError;if(!engineNotice.hidden)engineNotice.textContent=h.lastEngineError;
+    if(healthText.textContent!==lines)healthText.textContent=lines;
+    if(!h.lastEngineError)dismissedEngine='';engineNotice.hidden=state.paused||!h.lastEngineError||dismissedEngine===engineKey();
+    if(!engineNotice.hidden){const delay=h.nextRetryAt?Math.max(0,Math.ceil(h.nextRetryAt-Date.now()/1000)):0;engineMessage.textContent=h.lastEngineError+(delay?' · '+delay+' 秒后自动重试':'');}
   }

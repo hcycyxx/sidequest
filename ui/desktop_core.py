@@ -147,8 +147,8 @@ class Desktop:
         self._enable_background_alpha()
         self._round_corners()
         try:
-            import tray
-            self._tray = tray.Tray({})
+            import tray_v11_4
+            self._tray = tray_v11_4.Tray({})
             if not self._tray.start():
                 self._tray = None
         except Exception:
@@ -296,7 +296,10 @@ class Desktop:
                         self._schedule_maintenance()
                         last_daily = now
                     action = self._tray.poll() if self._tray else None
-                    if action in ("panel", "quit"):
+                    if action=='traymenu':
+                        import tray_popup_v11_4
+                        tray_popup_v11_4.show(self)
+                    elif action in ("panel", "quit"):
                         self.action("show" if action == "panel" else "quit")
                     elif action == "settings":
                         self._bridge.open_detail_settings()
