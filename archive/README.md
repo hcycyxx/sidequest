@@ -1,6 +1,6 @@
 # 历史文件归档
 
-旧文件原样保留，最新版从仓库根目录 `sidequest_latest.py` 启动；当前安装源码在 `installer_v11_4/`。
+旧文件原样保留，最新版从仓库根目录 `sidequest_latest.py` 启动；当前安装源码在 `installer_v11_5/`。
 
 | 文件夹 | 内容 |
 | --- | --- |
