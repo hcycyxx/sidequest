@@ -5,10 +5,19 @@ import copy
 def normalize_task(task, prior=None):
     q = copy.deepcopy(task)
     prior = prior or {}
+    rejected=prior.get('_rejected_completion')
+    if rejected is not None:
+        q['_rejected_completion']=rejected
+        if q.get('completion_candidate') and str(q.get('completion_evidence') or q.get('note') or '')==rejected:
+            q.pop('completion_candidate',None);q['status']='active'
     manual = prior.get('_user_state')
+    proposed_done=q.get('status')=='done'
     if isinstance(manual, dict):
         q['status'] = manual.get('status', prior.get('status', 'active'))
-        q.pop('completion_candidate', None)
+        if q['status']=='done':q.pop('completion_candidate',None)
+        elif proposed_done:
+            q['completion_candidate']=True
+            q['completion_evidence']=str(q.get('completion_evidence') or q.get('note') or '')[:240]
     if not isinstance(manual, dict) and q.get('status') == 'done' and prior.get('status') != 'done':
         q['status'] = 'pending'
         q['completion_candidate'] = True
@@ -16,7 +25,9 @@ def normalize_task(task, prior=None):
         q['completion_evidence'] = str(q.get('completion_evidence') or q.get('note') or '')[:240]
         for field in ('completed_at', 'completedAt', 'done_at'):
             q.pop(field, None)
-    if q.get('completion_candidate') and q.get('status') != 'done':
+    if rejected is not None and q.get('completion_candidate') and str(q.get('completion_evidence') or q.get('note') or '')==rejected:
+        q.pop('completion_candidate',None);q['status']=prior.get('status','active')
+    if q.get('completion_candidate') and q.get('status') != 'done' and not isinstance(manual,dict):
         q['status'] = 'pending'
     live = str(q.get('live_progress') or '').strip()
     if live:

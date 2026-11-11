@@ -72,7 +72,7 @@ def progress(task):
 
 def task_view(task, key):
     result = {name: task.get(name) for name in
-              ("id", "title", "status", "priority", "note", "progress_basis", "completion_candidate")}
+              ("id", "title", "status", "priority", "note", "progress_basis", "completion_candidate",'completion_evidence')}
     result["key"] = key
     result["steps"] = [{"text": str(step.get("text", "")), "done": bool(step.get("done"))}
                        for step in (task.get("steps") or []) if isinstance(step, dict)]
@@ -124,7 +124,7 @@ class Bridge:
         self._prefs={'skin':old.get('skin','glass'),'font':round(font*4/3),
                      'pinned':old.get('topmost',True),'autoHide':True,'width':336,'height':620,
                      'expanded':True,'stepsOpen':True,'edgeSide':None,
-                     'panelOpacity':number(old.get('panel_opacity'),100,20,100),'subtasksV11_3':False}
+                     'panelOpacity':number(old.get('panel_opacity'),100,20,100),'subtasksV11_3':False,'focusTask':None}
         saved=read_json(self._prefs_path,{})
         self._prefs.update({key:value for key,value in saved.items() if key in self._prefs or key in ('x','y')})
         if self._prefs.get('subtasksV11_3') is not True:
@@ -285,11 +285,25 @@ class Bridge:
             except (OSError, ValueError) as exc:
                 error = "任务读取失败，保留上次内容：" + str(exc)[:100]
             value = self._last_state
-            mains = sorted([q for q in value.get("main_quests", []) if q.get("status") != "done"], key=rank)
-            current = next((q for q in mains if q.get("status") == "active"), mains[0] if mains else None)
-            others = ([task_view(q, "main_quests") for q in mains if q is not current]
-                      + [task_view(q, "side_quests") for q in sorted(
-                          [q for q in value.get("side_quests", []) if q.get("status") != "done"], key=rank)])
+            queue=[(key,q) for key in ('main_quests','side_quests') for q in value.get(key,[]) if q.get('status')!='done']
+            identities=[key+':'+str(task.get('id')) for key,task in queue]
+            saved_order=self._prefs.get('cardOrder',[])
+            active_ids=set(identities)
+            stable_order=[identity for identity in saved_order if identity in active_ids]
+            known=set(stable_order);stable_order.extend(identity for identity in identities if identity not in known)
+            if stable_order!=saved_order:
+                updated={**self._prefs,'cardOrder':stable_order}
+                store._atomic_write(self._prefs_path,updated);self._prefs=updated
+            order={identity:index for index,identity in enumerate(self._prefs.get('cardOrder',[]))}
+            queue.sort(key=lambda pair:order.get(pair[0]+':'+str(pair[1].get('id')),len(order)))
+            focus=self._prefs.get('focusTask')
+            selected=next((pair for pair in queue if isinstance(focus,dict) and focus.get('key')==pair[0] and str(focus.get('id'))==str(pair[1].get('id'))),queue[0] if queue else None)
+            new_focus={'key':selected[0],'id':str(selected[1].get('id'))} if selected else None
+            if new_focus!=focus:
+                updated={**self._prefs,'focusTask':new_focus}
+                store._atomic_write(self._prefs_path,updated);self._prefs=updated
+            current=selected[1] if selected else None
+            others=[task_view(task,key) for key,task in queue if selected is None or not (key==selected[0] and task is current)]
             history = [task_view(q, key) for key in ("main_quests", "side_quests")
                        for q in value.get(key, []) if q.get("status") == "done"]
             history.sort(key=lambda q: str(q.get("completed_at") or ""), reverse=True)
@@ -299,7 +313,7 @@ class Bridge:
                 resting = bool(idle.get("suspended")) and time.time() - float(idle.get("checked_at", 0)) < 35
             except (TypeError, ValueError):
                 resting = False
-            return {"ok": True, "current": task_view(current, "main_quests") if current else None,
+            return {"ok": True, "current": task_view(current, selected[0]) if current else None,
                     "others": others, "history": history, "records":records, "activity": str(value.get("current_activity") or "暂无当前活动"),
                     "suggestion": str(value.get("suggestion") or "暂无下一步建议"),
                     "updated_at": value.get("updated_at"), "paused": (self._data / "paused").exists(),
@@ -373,6 +387,8 @@ class Bridge:
                     manual.update(status=task.get("status", "active"), changed_at=store.now())
                     after.update(copy.deepcopy(task))
                 store.mutate_state(self._state_path, edit)
+                if before.get('status')!='done' and after.get('status')=='done':
+                    self._notify_completion(after)
                 token = uuid.uuid4().hex
                 self._undo[token] = (key, qid, before, digest(after))
                 if len(self._undo) > 25:
@@ -444,6 +460,29 @@ class Bridge:
             try:self._timeline_store.action_event(request.get('request_id'),request.get('title'),'reopened')
             except Exception as exc:self._timeline_error='恢复事件未记录：'+str(exc)[:160]
         return result
+
+    def _notify_completion(self,task):
+        def deliver():
+            try:
+                from completion_notice_v11_5 import notify
+                notify(str(task.get('title') or '任务已完成'))
+            except Exception:
+                import logging
+                logging.exception('Task saved; Windows completion notification unavailable')
+        threading.Thread(target=deliver,daemon=True,name='SideQuest-completed-toast').start()
+
+    def defer_completion(self,request):
+        if not isinstance(request,dict) or request.get('key') not in ('main_quests','side_quests'):return {'ok':False,'error':'任务标识不正确'}
+        try:
+            def edit(state):
+                task=next((task for task in state.get(request['key'],[]) if str(task.get('id'))==str(request.get('id')) and task.get('title')==request.get('title')),None)
+                if task is None:raise ValueError('任务已变化，请刷新')
+                if task.get('status')=='done' or not task.get('completion_candidate'):raise ValueError('完成提示已变化，请刷新后重试')
+                task['_rejected_completion']=str(task.get('completion_evidence') or task.get('note') or '')
+                task.pop('completion_candidate',None);task['status']='active'
+            store.mutate_state(self._state_path,edit)
+            return {'ok':True,'snapshot':self.snapshot()}
+        except (OSError,ValueError,TimeoutError) as exc:return {'ok':False,'error':str(exc)}
 
     def undo(self,token):
         with self._lock:

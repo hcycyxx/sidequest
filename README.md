@@ -54,6 +54,8 @@ Windows AI 桌面任务面板：自动整理主线、支线和可勾选步骤，
 
 ## 版本与下载
 
+本地最新开发版 **v11.5.0**：当前进行任务锁定至完成、按卡片顺序接续，移除下一步建议；AI 完成确认及 Windows 完成通知。见[本版说明](docs/RELEASE-v11.5.0.md)。以下下载仍指已发布的 v11.4.0。
+
 当前版本：**V11.4 / v11.4.0**，由 `ui/current_release.json` 指定。历史 V11.3、V11.2 和 V1.1.0 保留供回退。
 
 **[下载 V11.4 完整安装器](https://github.com/hcycyxx/sidequest/releases/download/v11.4.0/SideQuest-v11.4.0-windows-x64-setup.exe)** · **[完整源码与中文文档](https://github.com/hcycyxx/sidequest/releases/download/v11.4.0/SideQuest-v11.4.0-source-docs.zip)** · [版本发布页](https://github.com/hcycyxx/sidequest/releases/tag/v11.4.0)

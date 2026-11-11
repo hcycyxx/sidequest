@@ -94,15 +94,24 @@
     input.addEventListener('change',()=>{const desired=input.checked;input.checked=step.done;changeTask(task,{kind:'step',step:index,step_text:step.text,done:desired},{control:input,node:input.closest('.sq-task')||q('.sq-focus')});});
     label.append(input,el('span','',step.text));return label;
   }
+  const candidatePanel=el('section','sq-candidate'),candidateText=el('p'),candidateActions=el('div','sq-candidate-actions');
+  const candidateYes=el('button','sq-text-button','确认完成'),candidateNo=el('button','sq-text-button','继续进行');
+  candidatePanel.setAttribute('role','status');candidatePanel.setAttribute('aria-live','polite');candidatePanel.hidden=true;
+  candidateYes.type=candidateNo.type='button';candidateYes.dataset.saveControl=candidateNo.dataset.saveControl='true';
+  candidateActions.append(candidateYes,candidateNo);candidatePanel.append(candidateText,candidateActions);q('.sq-main-view').insertBefore(candidatePanel,q('.sq-observation'));
+  let completionCandidate=null;
+  function renderCompletionCandidate(){completionCandidate=[state.current,...state.others].find(task=>task?.completion_candidate&&task.status!=='done')||null;candidatePanel.hidden=!completionCandidate;if(completionCandidate)candidateText.textContent='AI 判断可能已完成：'+completionCandidate.title+'。请确认。';}
+  candidateYes.addEventListener('click',event=>{if(completionCandidate)changeTask(completionCandidate,{kind:'task',done:true},{event,control:candidateYes,node:completionCandidate===state.current?q('.sq-focus'):null});});
+  candidateNo.addEventListener('click',async()=>{if(!completionCandidate||pending)return;candidateNo.disabled=true;try{const result=await call('defer_completion',completionCandidate);applySnapshot(result.snapshot);feedback('已保留任务，继续进行');}catch(error){feedback(error.message,true);}finally{candidateNo.disabled=false;}});
   function renderMain(task){
     state.current=task;q('.sq-focus').dataset.level=taskLevel(task);
-    text('[data-title]',task?.title||'暂无主线任务');text('[data-mini-title]',task?.title||'SideQuest');
+    text('[data-title]',task?.title||'暂无待办任务');text('[data-mini-title]',task?.title||'SideQuest');
     q('[data-action=complete]').disabled=pending||!task;
-    q('.sq-title-toggle').setAttribute('aria-label',(task?.title||'暂无主线任务')+'，收起或展开其他任务');
+    q('.sq-title-toggle').setAttribute('aria-label',(task?.title||'暂无待办任务')+'，收起或展开其他任务');
     const p=task?.progress||{low:null,high:null,label:'待估算',source:'unknown'};
     const value=p.low===null?0:(p.low+p.high)/2;
     q('.sq-ring-fill').setAttribute('stroke-dasharray',(170*value/100)+' 170');
-    q('.sq-ring').setAttribute('aria-label',p.label);text('.sq-ring span','主线');
+    q('.sq-ring').setAttribute('aria-label',p.label);text('.sq-ring span','进行中');
     q('[data-main-fill]').style.width=(p.low||0)+'%';q('[data-main-range]').style.left=(p.low||0)+'%';q('[data-main-range]').style.width=(p.low===null?0:p.high-p.low)+'%';
     const bar=q('[data-main-bar]');bar.setAttribute('aria-valuetext',p.label);
     if(p.low===null)bar.removeAttribute('aria-valuenow');else bar.setAttribute('aria-valuenow',value);
@@ -125,7 +134,7 @@
     const title=el('button','sq-task-name',task.title),details=el('div','sq-task-details');
     title.type='button';title.setAttribute('aria-expanded',String(detailOpen.has(idOf(task))));details.hidden=!detailOpen.has(idOf(task));
     title.addEventListener('click',()=>{details.hidden=!details.hidden;title.setAttribute('aria-expanded',String(!details.hidden));if(details.hidden)detailOpen.delete(idOf(task));else detailOpen.add(idOf(task));requestFit();});
-    const label=task.status==='waiting'?'等待回复':task.completion_candidate?'待确认'+(taskLevel(task)!=='unknown'?' · '+levelLabel(task):''):(task.key==='main_quests'?'主线 · ':'')+levelLabel(task);
+    const label=task.status==='waiting'?'等待回复':task.completion_candidate?'待确认'+(taskLevel(task)!=='unknown'?' · '+levelLabel(task):''):levelLabel(task);
     heading.append(complete,title,el('span',task.status==='waiting'?'sq-waiting':'sq-priority',label));
     const note=[task.note,task.progress_basis?'估算依据：'+task.progress_basis:''].filter(Boolean).join('\n');
     if(note)details.append(el('p','sq-note',note));
@@ -162,7 +171,7 @@
     state.health=snapshot.health||{};state.serviceBusy=!!state.health.busy;state.paused=!!snapshot.paused;state.resting=!!snapshot.resting;state.others=snapshot.others;state.historyRows=snapshot.history;state.records=snapshot.records||[];
     if(!prefsPending)applyPrefs(snapshot.prefs,!initialized);initialized=true;applyDesktop(snapshot.desktop);
     renderMain(snapshot.current);renderOthers();renderHistory();
-    text('[data-next]',snapshot.suggestion);text('.sq-observation p',snapshot.activity);
+    text('.sq-observation p',snapshot.activity);
     const date=snapshot.updated_at?new Date(snapshot.updated_at):null;
     text('[data-updated]',date&&!Number.isNaN(date.getTime())?'更新于 '+date.toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}):state.health.lastSuccess?'识别于 '+new Date(state.health.lastSuccess).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}):'等待首次识别');
     if(controlNotice&&!state.serviceBusy){controlNotice=false;if(state.health.error)feedback('后台切换失败：'+state.health.error,true);else if(state.paused)feedback('已暂停后台');else if(state.health.running){feedback('已启动后台，正在等待识别结果');feedbackKind='startup';}else feedback('后台未就绪，请查看后台状态',true);}
@@ -175,7 +184,7 @@
     if(snapshot.summaryError&&snapshot.summaryError!==lastSummaryError)feedback('日报生成失败：'+snapshot.summaryError,true);
     lastSummaryError=snapshot.summaryError;
     renderSummaryNotice(snapshot);
-    renderChrome();syncTaskList(true);settleInitialSteps();requestFit();
+    renderCompletionCandidate();renderChrome();syncTaskList(true);settleInitialSteps();requestFit();
   }
   function renderChrome(){
     text('[data-status]',state.serviceBusy?'切换中':!state.health.checkedAt?'核验中':state.health.stale?'待核验':state.health.error?'后台异常':state.paused?'已暂停':state.health.lastEngineError?'识别异常':state.health.enginePhase==='starting'?'后台准备中':state.health.enginePhase==='analyzing'?'识别中':!state.health.running?'后台未运行':state.resting?'自动休息':'观察中');q('.sq-dot').style.background=state.paused||!state.health.running?'var(--sq-gold)':'var(--sq-green)';updateHealthView();

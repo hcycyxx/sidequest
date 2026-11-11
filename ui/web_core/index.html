@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval'; style-src 'unsafe-inline'; img-src data:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<title>SideQuest V11.4</title><style>/*__LOCAL_CSS__*/
+<title>SideQuest V11.5.0</title><style>/*__LOCAL_CSS__*/
 /*__RUNTIME_CSS__*/</style></head><body>
 <div id="sidequest-app-main">
   <div class="sq-stage">
@@ -30,19 +30,19 @@
       <div class="sq-viewport" aria-label="可滚动任务内容">
       <div class="sq-main-view">
         <div class="sq-focus">
+          <div class="sq-section-title">当前进行任务</div>
           <div class="sq-primary-row">
-            <div class="sq-ring" role="img" aria-label="任务进度待估算"><svg viewBox="0 0 64 64" aria-hidden="true"><circle class="sq-ring-track" cx="32" cy="32" r="27"/><circle class="sq-ring-fill" cx="32" cy="32" r="27" stroke-dasharray="0 170"/></svg><span>主线</span></div>
-            <div class="sq-primary-copy"><h2 data-main-title><button class="sq-title-toggle cursor-interaction" data-action="expand" aria-label="主线任务，点击收起或展开其他任务" aria-expanded="true" aria-controls="sq-task-list"><span data-title>正在读取任务…</span><span data-main-chevron><i data-lucide="chevron-down" aria-hidden="true"></i></span></button></h2><div class="sq-estimate" data-estimate hidden>待估算</div></div>
+            <div class="sq-ring" role="img" aria-label="任务进度待估算"><svg viewBox="0 0 64 64" aria-hidden="true"><circle class="sq-ring-track" cx="32" cy="32" r="27"/><circle class="sq-ring-fill" cx="32" cy="32" r="27" stroke-dasharray="0 170"/></svg><span>进行中</span></div>
+            <div class="sq-primary-copy"><h2 data-main-title><button class="sq-title-toggle cursor-interaction" data-action="expand" aria-label="当前进行任务，点击收起或展开待办任务" aria-expanded="true" aria-controls="sq-task-list"><span data-title>正在读取任务…</span><span data-main-chevron><i data-lucide="chevron-down" aria-hidden="true"></i></span></button></h2><div class="sq-estimate" data-estimate hidden>待估算</div></div>
             <button class="sq-check cursor-interaction" data-action="complete" aria-label="标记当前任务完成" data-tooltip="标记完成"><i data-lucide="check" aria-hidden="true"></i></button>
           </div>
           <p class="sq-live" data-progress>暂无实时进展</p>
           <div class="sq-task-progress sq-main-progress"><div class="sq-progress-track" data-main-bar role="progressbar" aria-label="当前任务进度" aria-valuemin="0" aria-valuemax="100" aria-valuetext="待估算"><span class="sq-progress-fill" data-main-fill style="width:0%"></span><span class="sq-progress-range" data-main-range style="left:0%;width:0%"></span></div><span class="sq-progress-label" data-main-bar-label>待估算</span></div>
-          <div class="sq-next"><div class="sq-next-label"><i data-lucide="corner-down-right" aria-hidden="true"></i>下一步建议</div><p data-next>暂无下一步建议</p></div>
           <details class="sq-steps"><summary class="cursor-interaction" aria-expanded="false" aria-controls="sq-step-content"><span>报价步骤</span><span data-step-count>0 / 0</span><i data-lucide="chevron-down" aria-hidden="true"></i></summary><div id="sq-step-content" class="sq-steps-content" hidden><div class="sq-step-list"></div></div></details>
         </div>
         <div class="sq-observation"><i data-lucide="eye" aria-hidden="true"></i><div><span>当前活动</span><p>暂无当前活动</p></div></div>
         <div class="sq-feedback" role="status" hidden><span data-message></span><button class="sq-text-button cursor-interaction" data-action="undo" hidden>撤销</button></div>
-        <button class="sq-list-toggle cursor-interaction" data-action="expand" aria-expanded="true" aria-controls="sq-task-list"><span>支线任务 <span class="sq-count">0</span></span><span class="sq-toggle-label"><span data-list-state>收起</span><i data-lucide="chevron-down" aria-hidden="true"></i></span></button>
+        <button class="sq-list-toggle cursor-interaction" data-action="expand" aria-expanded="true" aria-controls="sq-task-list"><span>待办任务 <span class="sq-count">0</span></span><span class="sq-toggle-label"><span data-list-state>收起</span><i data-lucide="chevron-down" aria-hidden="true"></i></span></button>
         <div id="sq-task-list"></div>
         <footer class="sq-footer"><span data-updated>等待数据</span><button class="sq-text-button cursor-interaction" data-action="summary">今日总结</button><button class="sq-text-button cursor-interaction" data-action="history" aria-expanded="false">任务记录<i data-lucide="arrow-up-right" aria-hidden="true"></i></button></footer>
         <div class="sq-history" hidden><div class="sq-section-title">任务记录 · 保留所有状态</div><div data-history-list></div></div>
