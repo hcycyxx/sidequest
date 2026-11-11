@@ -1,10 +1,10 @@
 <div align="center">
   <h1>SideQuest</h1>
-  <p><strong>把主线、支线与下一步行动，留在桌面上。</strong></p>
-  <p><img alt="Windows" src="https://img.shields.io/badge/platform-Windows-0078D6"> <img alt="源码 V11.4" src="https://img.shields.io/badge/source-V11.4-B56C43"> <a href="https://github.com/hcycyxx/sidequest/stargazers"><img alt="GitHub Stars" src="https://img.shields.io/github/stars/hcycyxx/sidequest?color=3B77A1"></a></p>
+  <p><strong>锁定当前任务，完成一项，再推进下一项。</strong></p>
+  <p><img alt="Windows" src="https://img.shields.io/badge/platform-Windows-0078D6"> <img alt="源码 v11.5.0" src="https://img.shields.io/badge/source-v11.5.0-B56C43"> <a href="https://github.com/hcycyxx/sidequest/stargazers"><img alt="GitHub Stars" src="https://img.shields.io/github/stars/hcycyxx/sidequest?color=3B77A1"></a></p>
 </div>
 
-Windows AI 桌面任务面板：自动整理主线、支线和可勾选步骤，记录时间轴并生成日报。**内置 WorkBuddy 扫码桥接，可接入账号可用的 HY3 / HY4 等模型，在官方限免或账号免费额度内免费使用。** 也支持自填本地或云端兼容 API。
+Windows AI 桌面任务面板：锁定当前进行任务、按卡片顺序接续并支持可勾选步骤，记录时间轴并生成日报。**内置 WorkBuddy 扫码桥接，可接入账号可用的 HY3 / HY4 等模型，在官方限免或账号免费额度内免费使用。** 也支持自填本地或云端兼容 API。
 
 ## 本次更新：WorkBuddy 桥接
 
@@ -14,7 +14,7 @@ Windows AI 桌面任务面板：自动整理主线、支线和可勾选步骤，
 - **想“白嫖”模型：使用官方标记为限免或账号享有免费额度的模型。** 活动时段、每日额度、地区及超额后的积分消耗，以 WorkBuddy 当前账号和模型页面为准；SideQuest 不提供永久、无限免费额度。
 - 同时更新了统一风格的托盘菜单、可关闭的错误提示、日报进度与自动重连。
 
-[WorkBuddy 模型说明](https://free-plat-test.qcloudcdn.com/docs/workbuddymini/features/Select-Model) · [本版完整更新记录](docs/RELEASE_V11_4_20261110.md)
+[WorkBuddy 模型说明](https://free-plat-test.qcloudcdn.com/docs/workbuddymini/features/Select-Model) · [桥接功能说明](docs/RELEASE_V11_4_20261110.md)
 
 ## 文件怎么找
 
@@ -22,7 +22,7 @@ Windows AI 桌面任务面板：自动整理主线、支线和可勾选步骤，
 | --- | --- |
 | `ui/`、`engine/` | 当前界面、后台与任务逻辑 |
 | `bridge_workbuddy_v11_4/` | 复用的 WorkBuddy 桥接内核 |
-| `installer_v11_4/` | 当前安装包的构建源码 |
+| `installer_v11_5/` | 当前安装包的构建源码 |
 | `docs/` | 使用、更新和发布文档 |
 | `archive/` | 旧入口、启动脚本和安装版源码 |
 | `sidequest_latest.py` | 最新版源码启动入口 |
@@ -54,25 +54,23 @@ Windows AI 桌面任务面板：自动整理主线、支线和可勾选步骤，
 
 ## 版本与下载
 
-本地最新开发版 **v11.5.0**：当前进行任务锁定至完成、按卡片顺序接续，移除下一步建议；AI 完成确认及 Windows 完成通知。见[本版说明](docs/RELEASE-v11.5.0.md)。以下下载仍指已发布的 v11.4.0。
+当前版本：**v11.5.0**，由 `ui/current_release.json` 指定。历史发布保留供回退。
 
-当前版本：**V11.4 / v11.4.0**，由 `ui/current_release.json` 指定。历史 V11.3、V11.2 和 V1.1.0 保留供回退。
+**[下载 Windows 完整安装包](https://github.com/hcycyxx/sidequest/releases/download/v11.5.0/SideQuest-v11.5.0-windows-x64-setup.exe)** · **[完整源码与中文文档](https://github.com/hcycyxx/sidequest/releases/download/v11.5.0/SideQuest-v11.5.0-source-docs.zip)** · [版本发布页](https://github.com/hcycyxx/sidequest/releases/tag/v11.5.0)
 
-**[下载 V11.4 完整安装器](https://github.com/hcycyxx/sidequest/releases/download/v11.4.0/SideQuest-v11.4.0-windows-x64-setup.exe)** · **[完整源码与中文文档](https://github.com/hcycyxx/sidequest/releases/download/v11.4.0/SideQuest-v11.4.0-source-docs.zip)** · [版本发布页](https://github.com/hcycyxx/sidequest/releases/tag/v11.4.0)
+## v11.5.0 更新
 
-## V11.4 更新
+- 顶部改为当前进行任务，锁定到完成，重新打开应用后继续保持。
+- 完成后按待办卡片顺序接下一项，拖动可调整后续顺序。
+- 移除下一步建议版块；AI 判断可能完成时先弹确认，确认后才完成并发 Windows 原生通知。
+- 保留 WorkBuddy 扫码桥接、HY3/HY4 账号限免与免费额度接入、任务记录、时间轴和日报。
+- 归档源码保留；本地旧程序产物按用户选择移入回收站，任务与登录数据保留。
 
-- 托盘菜单随主面板主题绘制，最小化直接收到托盘。
-- 异常提示可以关闭；同色进度条区分等待与完成，日报生成结束后自动收起提示。
-- 模型输出缺少 JSON 时尝试一次格式纠正，网络故障自动重试，保留原任务。
-- 设置页新增 WorkBuddy 国内/国际账号扫码登录，内置 Node.js，无需另装 Node；也保留普通 API 接口。
-- 保留背景透明度、自定义提示词、任务步骤和完整任务记录，以及窗口折叠修复。
-
-[功能、登录与验证说明](docs/RELEASE_V11_4_20261110.md)。安装包已编译并在本机执行安装；**未运行界面、扫码、模型及跨机功能验收**。上方截图沿用已公开的历史界面，不作为 V11.4 实测截图。
+[完整更新说明](docs/RELEASE-v11.5.0.md)。已编译并安装到本机；按要求未运行界面、通知或模型功能测试。上方为历史截图，不作为 v11.5.0 验收截图。
 
 ## 功能
 
-- 主线和支线任务、步骤勾选、展开与排序；手动操作优先保留。
+- 当前进行任务锁定、步骤勾选、展开与排序；手动操作优先保留。
 - 桌面浮窗、贴边隐藏、托盘及每日总结。
 - AI 判断完成后等待用户确认，不以模型判断直接替代用户验收。
 - 模型地址、名称和密钥可配置；设置页提供获取模型与连通性按钮。
@@ -82,7 +80,7 @@ Windows AI 桌面任务面板：自动整理主线、支线和可勾选步骤，
 
 Windows 桌面环境；源码界面使用 Python、pywebview 与 WebView2，当前设置页同样使用 pywebview。依赖见 `requirements-ui-v10.txt` 和锁定文件。OCR 及窗口读取按实际需要配置，模型服务需用户自行提供。
 
-V11.4 完整安装包沿用既有微软组件方案，并增加独立 Node 运行组件，内含 Python、CPU OCR、WebView2 和 .NET 4.8 离线安装程序；缺少微软组件时可能需要管理员确认或重启。构建记录不等于跨电脑运行通过。
+v11.5.0 完整安装包沿用既有微软组件方案，并增加独立 Node 运行组件，内含 Python、CPU OCR、WebView2 和 .NET 4.8 离线安装程序；缺少微软组件时可能需要管理员确认或重启。构建记录不等于跨电脑运行通过。
 
 ## 安装与启动
 
@@ -98,9 +96,9 @@ python -m venv .venv
 
 需要 Python 安装包含 tkinter，并具备可用的 WebView2/.NET 组件。以上直接打开面板，不等于配置完成后台；后台使用基础 Python 环境，窗口抓取和 OCR 依赖需按需在该环境安装。以上为按源码整理的步骤，本轮未完成全新电脑安装验收。`--open` 和 `launch_sidequest_latest.ps1` 另依赖本机预建的 `%LOCALAPPDATA%\SideQuestV10Runtime` 环境，不能直接视为通用安装器。
 
-### V11.4 完整安装版
+### v11.5.0 完整安装版
 
-从 [v11.4.0 Release](https://github.com/hcycyxx/sidequest/releases/tag/v11.4.0) 下载完整安装器，先退出旧版再安装。沿用 `%LOCALAPPDATA%\Programs\SideQuestDesktop`，任务与设置保存在 `%LOCALAPPDATA%\SideQuestDesktop\data`。
+从 [v11.5.0 Release](https://github.com/hcycyxx/sidequest/releases/tag/v11.5.0) 下载完整安装器，先退出旧版再安装。沿用 `%LOCALAPPDATA%\Programs\SideQuestDesktop`，任务与设置保存在 `%LOCALAPPDATA%\SideQuestDesktop\data`。
 
 ## 使用与设置
 
@@ -124,7 +122,7 @@ V11.2 安装版从 Windows 已安装应用中卸载，按版本说明默认保�
 
 ## 构建与验证
 
-当前构建描述为 `installer_v11_4/build_installed.spec` 与 `installer_v11_4/SideQuestSetup.iss`。参见 [V11.4 构建说明](installer_v11_4/BUILDING.md)及[构建记录](installer_v11_4/BUILD_RESULT_20261110.json)。
+当前构建描述为 `installer_v11_5/build_installed.spec` 与 `installer_v11_5/SideQuestSetup.iss`。参见 [v11.5.0 构建说明](installer_v11_5/BUILDING.md)及[构建记录](installer_v11_5/BUILD_RESULT_PUBLISH_20261111.json)。
 
 已完成源码检查、PyInstaller 与 Inno Setup 编译、本机安装及启动命令。按用户要求，未做应用界面、扫码授权、真实模型调用和跨机功能验收。编译成功与安装成功不代表这些功能已经验收。
 
